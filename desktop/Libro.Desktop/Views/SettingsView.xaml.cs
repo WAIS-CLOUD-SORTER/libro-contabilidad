@@ -168,6 +168,7 @@ public partial class SettingsView : UserControl, IRefreshable
                 ? new[] { "Ningún teléfono emparejado todavía." }
                 : devices.Select(device => $"{device.Name} · último uso {device.LastSeenAt}").ToArray();
             SyncErrorText.Text = "";
+            LoadMercadoPago();
         }
         catch (Exception ex)
         {
@@ -216,6 +217,130 @@ public partial class SettingsView : UserControl, IRefreshable
 
         Libro.Desktop.Sync.SyncStore.SaveDevices(new List<Libro.Desktop.Sync.PairedDevice>());
         LoadSync();
+    }
+
+    // ------------------------------------------------ Mercado Pago (terminal)
+
+    private void LoadMercadoPago()
+    {
+        var credentials = Libro.Desktop.Sync.MpCredentialStore.Load();
+        MpDeviceBox.Text = credentials.DeviceId;
+
+        // El token nunca se vuelve a mostrar: si ya hay uno guardado se indica
+        // y dejar el campo vacío al guardar conserva el existente.
+        MpStatusText.Text = Libro.Desktop.Sync.MpCredentialStore.IsConfigured
+            ? "Hay un Access Token guardado en este equipo. Déjalo vacío para conservarlo."
+            : "Sin Access Token: se usa la terminal simulada.";
+
+        var (terminal, reason) = Libro.Desktop.Sync.MercadoPagoPointTerminal.Resolve();
+        MpStatusText.Text += $"\nTerminal activa: {terminal.Name}. {reason}";
+        MpErrorText.Text = "";
+    }
+
+    private async void MpTest_Click(object sender, RoutedEventArgs e)
+    {
+        MpErrorText.Text = "";
+        MpDeviceCombo.ItemsSource = null;
+
+        var token = MpTokenBox.Password.Trim();
+        if (string.IsNullOrWhiteSpace(token))
+            token = Libro.Desktop.Sync.MpCredentialStore.Load().AccessToken;
+
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            MpErrorText.Text = "Escribe el Access Token para probarlo.";
+            return;
+        }
+
+        MpTestButton.IsEnabled = false;
+        MpStatusText.Text = "Consultando terminales en Mercado Pago…";
+        try
+        {
+            var (ok, detail, terminals) =
+                await Libro.Desktop.Sync.MpTerminals.ListAsync(token, CancellationToken.None);
+
+            if (!ok)
+            {
+                MpStatusText.Text = "";
+                MpErrorText.Text = detail;
+                return;
+            }
+
+            if (terminals.Count == 0)
+            {
+                MpStatusText.Text = "Credenciales válidas, pero no hay terminales Point en la cuenta. " +
+                                    "Configura el terminal en Mercado Pago antes de cobrar.";
+                return;
+            }
+
+            MpDeviceCombo.ItemsSource = terminals
+                .Select(terminal => $"{terminal.Name} · {terminal.Id}")
+                .ToList();
+            MpStatusText.Text = $"Credenciales válidas. {terminals.Count} terminal(es) encontrado(s); " +
+                                "elige uno para completar el ID.";
+
+            if (string.IsNullOrWhiteSpace(MpDeviceBox.Text)) MpDeviceBox.Text = terminals[0].Id;
+        }
+        finally
+        {
+            MpTestButton.IsEnabled = true;
+        }
+    }
+
+    private void MpDeviceCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (MpDeviceCombo.SelectedItem is not string selected) return;
+        var parts = selected.Split('·');
+        if (parts.Length == 2) MpDeviceBox.Text = parts[1].Trim();
+    }
+
+    private void MpSave_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var existing = Libro.Desktop.Sync.MpCredentialStore.Load();
+            var token = MpTokenBox.Password.Trim();
+            if (string.IsNullOrWhiteSpace(token)) token = existing.AccessToken;
+
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                MpErrorText.Text = "Sin Access Token no se puede configurar el cobro con terminal.";
+                return;
+            }
+
+            Libro.Desktop.Sync.MpCredentialStore.Save(new Libro.Desktop.Sync.MercadoPagoCredentials
+            {
+                AccessToken = token,
+                DeviceId = MpDeviceBox.Text.Trim(),
+            });
+
+            MpTokenBox.Clear();
+            AppLog.Write("Credenciales de Mercado Pago actualizadas");
+            LoadMercadoPago();
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("Guardar credenciales de Mercado Pago", ex);
+            MpErrorText.Text = "No se pudieron guardar: " + ex.Message;
+        }
+    }
+
+    private void MpForget_Click(object sender, RoutedEventArgs e)
+    {
+        var owner = Window.GetWindow(this);
+        var answer = owner is null
+            ? MessageBoxResult.No
+            : MessageBox.Show(owner,
+                "¿Borrar el Access Token guardado en este equipo? Volverás a la terminal simulada.",
+                "Libro", MessageBoxButton.YesNo, MessageBoxImage.Question);
+        if (answer != MessageBoxResult.Yes) return;
+
+        Libro.Desktop.Sync.MpCredentialStore.Clear();
+        MpTokenBox.Clear();
+        MpDeviceBox.Text = "";
+        MpDeviceCombo.ItemsSource = null;
+        AppLog.Write("Credenciales de Mercado Pago borradas");
+        LoadMercadoPago();
     }
 
     private void LoadCompany()

@@ -13,6 +13,11 @@ public sealed class SyncSettings
 {
     public bool Enabled { get; set; }
     public int Port { get; set; } = 8787;
+
+    /// <summary>
+    /// Evita repetir el aviso de configurar Mercado Pago en cada arranque.
+    /// </summary>
+    public bool MercadoPagoPrompted { get; set; }
 }
 
 /// <summary>Teléfono emparejado. Solo se guarda el hash del token, nunca el token.</summary>
@@ -201,7 +206,7 @@ public sealed class MercadoPagoPointTerminal : IPaymentTerminal
             using var content = new StringContent(
                 BuildIntentRequest(request), Encoding.UTF8, "application/json");
 
-            using var message = new HttpRequestMessage(HttpMethod.Post, $"{_baseUrl}/point/integrations")
+            using var message = new HttpRequestMessage(HttpMethod.Post, $"{_baseUrl}/v1/orders")
             {
                 Content = content,
             };
@@ -229,15 +234,37 @@ public sealed class MercadoPagoPointTerminal : IPaymentTerminal
         }
     }
 
-    /// <summary>Importe en centavos según la convención de Libro; Point usa pesos.</summary>
+    /// <summary>
+    /// Cuerpo para Orders API (Point). Importe en pesos con dos decimales según
+    /// la convención de Mercado Pago; Libro guarda centavos.
+    /// ADVERTENCIA: la forma exacta de este cuerpo NO se ha podido validar
+    /// contra el servicio real. Si Mercado Pago responde 400, el mensaje se
+    /// devuelve tal cual en `Detail` para corregir este método.
+    /// </summary>
     private string BuildIntentRequest(TerminalRequest request)
     {
         var amount = (request.AmountCents / 100m).ToString("0.00", CultureInfo.InvariantCulture);
         var payload = new Dictionary<string, object?>
         {
-            ["amount"] = decimal.Parse(amount, CultureInfo.InvariantCulture),
+            ["type"] = "point",
+            ["external_reference"] = "libro-" + Guid.NewGuid().ToString("N")[..12],
             ["description"] = string.IsNullOrWhiteSpace(request.Description) ? "Venta Libro" : request.Description,
             ["device_id"] = _deviceId,
+            ["transactions"] = new Dictionary<string, object?>
+            {
+                ["payments"] = new[]
+                {
+                    new Dictionary<string, object?>
+                    {
+                        ["amount"] = amount,
+                        ["payment_method"] = new Dictionary<string, object?>
+                        {
+                            ["id"] = "point",
+                            ["type"] = "on_terminal",
+                        },
+                    },
+                },
+            },
         };
         return JsonSerializer.Serialize(payload);
     }
@@ -255,8 +282,11 @@ public sealed class MercadoPagoPointTerminal : IPaymentTerminal
 
             var outcome = status.ToLowerInvariant() switch
             {
-                "approved" or "finished" => TerminalOutcome.Approved,
-                "rejected" or "canceled" or "error" => TerminalOutcome.Rejected,
+                // Orders API usa processed/finished; se conservan los valores de la
+                // API anterior por si el terminal responde con el modelo viejo.
+                "processed" or "approved" or "finished" => TerminalOutcome.Approved,
+                "failed" or "rejected" or "canceled" or "cancelled" or "error" or "refunded"
+                    => TerminalOutcome.Rejected,
                 _ => TerminalOutcome.Pending,
             };
 
@@ -272,16 +302,200 @@ public sealed class MercadoPagoPointTerminal : IPaymentTerminal
         value.Length <= 300 ? value : value[..300] + "…";
 
     /// <summary>
-    /// Elige la terminal disponible: Point si hay credenciales y, si no,
-    /// la simulada. Devuelve también el motivo para mostrarlo en la interfaz.
+    /// Elige la terminal disponible: Point si hay credenciales guardadas (o en
+    /// el entorno) y, si no, la simulada. Devuelve el motivo para la interfaz.
     /// </summary>
     public static (IPaymentTerminal Terminal, string Reason) Resolve()
     {
-        var token = Environment.GetEnvironmentVariable("MP_ACCESS_TOKEN") ?? "";
-        var device = Environment.GetEnvironmentVariable("MP_DEVICE_ID") ?? "";
+        var stored = MpCredentialStore.Load();
+        var token = string.IsNullOrWhiteSpace(stored.AccessToken)
+            ? Environment.GetEnvironmentVariable("MP_ACCESS_TOKEN") ?? ""
+            : stored.AccessToken;
+        var device = string.IsNullOrWhiteSpace(stored.DeviceId)
+            ? Environment.GetEnvironmentVariable("MP_DEVICE_ID") ?? ""
+            : stored.DeviceId;
+
         var terminal = new MercadoPagoPointTerminal(token, device);
         return terminal.IsConfigured
             ? (terminal, "Mercado Pago Point configurada.")
             : (new SimulatedTerminal(), "Sin credenciales de Mercado Pago: se usa la terminal simulada.");
     }
+}
+
+/// <summary>Credenciales de Mercado Pago introducidas por el usuario.</summary>
+public sealed class MercadoPagoCredentials
+{
+    public string AccessToken { get; set; } = "";
+    public string DeviceId { get; set; } = "";
+}
+
+/// <summary>
+/// Guarda el Access Token cifrado con DPAPI del usuario actual, igual que
+/// clave.bin. Nunca se escribe en texto plano ni se registra en la bitácora.
+/// </summary>
+public static class MpCredentialStore
+{
+    private static readonly byte[] Entropy = Encoding.UTF8.GetBytes("Libro.MercadoPago.v1");
+    private static readonly byte[] Magic = Encoding.ASCII.GetBytes("LMP1");
+
+    private static string FilePath => Path.Combine(AppPaths.DataDirectory, "mercadopago.bin");
+
+    public static MercadoPagoCredentials Load()
+    {
+        try
+        {
+            if (!File.Exists(FilePath)) return new MercadoPagoCredentials();
+            var blob = File.ReadAllBytes(FilePath);
+            if (blob.Length <= Magic.Length || !blob.AsSpan(0, Magic.Length).SequenceEqual(Magic))
+                return new MercadoPagoCredentials();
+
+            var plain = ProtectedData.Unprotect(
+                blob.AsSpan(Magic.Length).ToArray(), Entropy, DataProtectionScope.CurrentUser);
+            return JsonSerializer.Deserialize<MercadoPagoCredentials>(Encoding.UTF8.GetString(plain))
+                   ?? new MercadoPagoCredentials();
+        }
+        catch (Exception)
+        {
+            // Ilegibles o de otra cuenta de Windows: se tratan como ausentes.
+            return new MercadoPagoCredentials();
+        }
+    }
+
+    public static void Save(MercadoPagoCredentials credentials)
+    {
+        Directory.CreateDirectory(AppPaths.DataDirectory);
+        var plain = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(credentials));
+        var encrypted = ProtectedData.Protect(plain, Entropy, DataProtectionScope.CurrentUser);
+
+        var output = new byte[Magic.Length + encrypted.Length];
+        Magic.CopyTo(output, 0);
+        encrypted.CopyTo(output, Magic.Length);
+
+        var temporary = FilePath + ".tmp";
+        File.WriteAllBytes(temporary, output);
+        File.Move(temporary, FilePath, overwrite: true);
+    }
+
+    public static void Clear()
+    {
+        try
+        {
+            if (File.Exists(FilePath)) File.Delete(FilePath);
+        }
+        catch (IOException)
+        {
+            // No es crítico para la operación.
+        }
+    }
+
+    public static bool IsConfigured => !string.IsNullOrWhiteSpace(Load().AccessToken);
+}
+
+/// <summary>
+/// Consulta los terminales Point de la cuenta. Es una llamada de solo lectura,
+/// así que permite validar el Access Token sin cobrar nada.
+/// </summary>
+public static class MpTerminals
+{
+    private const string BaseUrl = "https://api.mercadopago.com";
+    private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(20) };
+
+    public sealed class TerminalInfo
+    {
+        public string Id { get; init; } = "";
+        public string Name { get; init; } = "";
+        public string Mode { get; init; } = "";
+    }
+
+    public static async Task<(bool Ok, string Detail, List<TerminalInfo> Terminals)> ListAsync(
+        string accessToken, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(accessToken))
+            return (false, "Falta el Access Token.", new List<TerminalInfo>());
+
+        try
+        {
+            using var message = new HttpRequestMessage(HttpMethod.Get, $"{BaseUrl}/terminals/v1/list");
+            message.Headers.TryAddWithoutValidation("Authorization", $"Bearer {accessToken}");
+
+            using var response = await Http.SendAsync(message, cancellationToken);
+            var body = await response.Content.ReadAsStringAsync(cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+                return (false,
+                    $"Mercado Pago respondió {(int)response.StatusCode}: {Truncate(body)}",
+                    new List<TerminalInfo>());
+
+            return (true, "Credenciales válidas.", Parse(body));
+        }
+        catch (OperationCanceledException)
+        {
+            return (false, "Mercado Pago no respondió a tiempo.", new List<TerminalInfo>());
+        }
+        catch (HttpRequestException ex)
+        {
+            return (false, ex.Message, new List<TerminalInfo>());
+        }
+    }
+
+    private static List<TerminalInfo> Parse(string body)
+    {
+        var result = new List<TerminalInfo>();
+        try
+        {
+            using var document = JsonDocument.Parse(body);
+            var root = document.RootElement;
+
+            var array = default(JsonElement);
+            var found = false;
+
+            if (root.ValueKind == JsonValueKind.Array)
+            {
+                array = root;
+                found = true;
+            }
+            else if (root.ValueKind == JsonValueKind.Object)
+            {
+                foreach (var name in new[] { "data", "devices", "results" })
+                {
+                    if (root.TryGetProperty(name, out var candidate) &&
+                        candidate.ValueKind == JsonValueKind.Array)
+                    {
+                        array = candidate;
+                        found = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!found) return result;
+
+            foreach (var item in array.EnumerateArray())
+            {
+                result.Add(new TerminalInfo
+                {
+                    Id = Text(item, "id", "device_id"),
+                    Name = Text(item, "name", "pos_id", "serial_number"),
+                    Mode = Text(item, "operating_mode", "mode"),
+                });
+            }
+        }
+        catch (JsonException)
+        {
+            // Lista vacía; el detalle del error ya se devolvió al llamador.
+        }
+        return result;
+    }
+
+    private static string Text(JsonElement element, params string[] names)
+    {
+        foreach (var name in names)
+        {
+            if (element.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String)
+                return value.GetString() ?? "";
+        }
+        return "";
+    }
+
+    private static string Truncate(string value) => value.Length <= 300 ? value : value[..300] + "…";
 }

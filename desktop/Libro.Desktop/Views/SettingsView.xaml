@@ -407,6 +407,36 @@
                                         HorizontalAlignment="Left" Click="SyncRevoke_Click" />
                             </StackPanel>
                         </Border>
+
+                        <Border Style="{StaticResource Card}" Margin="0,16,0,0">
+                            <StackPanel>
+                                <TextBlock Text="Cobro con terminal Mercado Pago" Style="{StaticResource SectionTitle}" />
+                                <TextBlock Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,6,0,0"
+                                           Text="Pega el Access Token de producción de tu aplicación en Mercado Pago Developers. Se guarda cifrado con la cuenta de Windows de este equipo (DPAPI) y no se escribe en la bitácora. Sin estos datos, Libro usa una terminal simulada que no cobra nada." />
+
+                                <TextBlock Text="Access Token" Style="{StaticResource FieldLabel}" Margin="0,16,0,0" />
+                                <PasswordBox x:Name="MpTokenBox" Height="38" Padding="10,8" VerticalContentAlignment="Center" />
+
+                                <TextBlock Text="ID del terminal (device_id)" Style="{StaticResource FieldLabel}" Margin="0,12,0,0" />
+                                <TextBox x:Name="MpDeviceBox" />
+                                <ComboBox x:Name="MpDeviceCombo" Margin="0,8,0,0" DisplayMemberPath="."
+                                          SelectionChanged="MpDeviceCombo_SelectionChanged" />
+
+                                <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                                    <Button x:Name="MpTestButton" Content="Probar credenciales"
+                                            Style="{StaticResource SecondaryButton}" Click="MpTest_Click" />
+                                    <Button x:Name="MpSaveButton" Content="Guardar"
+                                            Style="{StaticResource PrimaryButton}" Margin="10,0,0,0" Click="MpSave_Click" />
+                                    <Button x:Name="MpForgetButton" Content="Olvidar"
+                                            Style="{StaticResource GhostButton}" Margin="10,0,0,0" Click="MpForget_Click" />
+                                </StackPanel>
+
+                                <TextBlock x:Name="MpStatusText" Style="{StaticResource MutedText}"
+                                           TextWrapping="Wrap" Margin="0,12,0,0" />
+                                <TextBlock x:Name="MpErrorText" Style="{StaticResource ErrorText}"
+                                           TextWrapping="Wrap" Margin="0,6,0,0" />
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
                 </ScrollViewer>
             </Grid>

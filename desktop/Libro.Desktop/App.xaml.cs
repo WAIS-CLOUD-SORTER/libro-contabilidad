@@ -120,6 +120,48 @@ public partial class App : Application
         ShutdownMode = ShutdownMode.OnMainWindowClose;
         window.Show();
         StartSalesServerIfEnabled();
+        PromptForTerminalSetup(window);
+    }
+
+    /// <summary>
+    /// La primera vez que se abre Libro tras instalar, ofrece configurar el cobro
+    /// con terminal. Se pregunta una sola vez y se recuerda la decisión.
+    /// </summary>
+    private void PromptForTerminalSetup(MainWindow window)
+    {
+        try
+        {
+            if (Libro.Desktop.Sync.MpCredentialStore.IsConfigured) return;
+
+            // En modo demo y en las pruebas automatizadas el aviso estorbaría
+            // (dejaría un diálogo modal abierto en medio de la ejecución).
+            if (Environment.GetCommandLineArgs()
+                    .Any(argument => argument.Equals("--dev", StringComparison.OrdinalIgnoreCase)))
+                return;
+            if (!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("LIBRO_SYNC"))) return;
+
+            var settings = Libro.Desktop.Sync.SyncStore.LoadSettings();
+            if (settings.MercadoPagoPrompted) return;
+
+            settings.MercadoPagoPrompted = true;
+            Libro.Desktop.Sync.SyncStore.SaveSettings(settings);
+
+            var answer = MessageBox.Show(window,
+                "¿Quieres configurar ahora el cobro con tarjeta en una terminal Mercado Pago?" +
+                Environment.NewLine + Environment.NewLine +
+                "Necesitas el Access Token de tu aplicación en Mercado Pago Developers y el ID del " +
+                "terminal. Se guardan cifrados con tu cuenta de Windows." +
+                Environment.NewLine + Environment.NewLine +
+                "Si prefieres hacerlo después: Configuración → Ventas por celular.",
+                "Libro · Cobro con terminal",
+                MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+            if (answer == MessageBoxResult.Yes) window.Navigate("configuracion");
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("Aviso de configuración de terminal", ex);
+        }
     }
 
     /// <summary>

@@ -26,7 +26,7 @@ El artefacto listo para distribuir es:
 SHA256:
 
 ```text
-6577E3FDA0AA55D20600BB54C181A1A37A55C55A23119DC384FB37417F1FB2F7  Libro-Setup-2.1.0.exe
+292D6346F91597B79AC43043652BBA8BEEE0C0EC3DD21E351A1D674DF225B686  Libro-Setup-2.1.0.exe
 ```
 
 > El SHA256 cambia con cada compilación. El valor de arriba corresponde al build
