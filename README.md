@@ -26,8 +26,12 @@ El artefacto listo para distribuir es:
 SHA256:
 
 ```text
-52F5A0F605F077AB6BFF29544476DCEC2C9B4D61B9D168EDC9611E6806F41C95  Libro-Setup-2.1.0.exe
+6577E3FDA0AA55D20600BB54C181A1A37A55C55A23119DC384FB37417F1FB2F7  Libro-Setup-2.1.0.exe
 ```
+
+> El SHA256 cambia con cada compilación. El valor de arriba corresponde al build
+> del 2026-10-25 18:56; verifica siempre contra el `.sha256` que acompaña al
+> instalador en `dist\`.
 
 Es una instalación **por usuario**, no requiere permisos de administrador:
 
