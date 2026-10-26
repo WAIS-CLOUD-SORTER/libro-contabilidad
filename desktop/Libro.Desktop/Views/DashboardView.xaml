@@ -149,8 +149,9 @@
                                         Height="30" HorizontalAlignment="Right" VerticalAlignment="Top"
                                         Click="ViewTransactions_Click" />
                             </Grid>
-                            <DataGrid ItemsSource="{Binding RecentTransactions}" Margin="0,14,0,0"
-                                      Height="236" RowHeight="38" ColumnHeaderHeight="34">
+                            <Grid Margin="0,14,0,0">
+                                <DataGrid x:Name="RecentTransactionsGrid" ItemsSource="{Binding RecentTransactions}"
+                                          Height="236" RowHeight="38" ColumnHeaderHeight="34">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Fecha" Width="90"
                                                         Binding="{Binding Date, Converter={StaticResource Date}}" />
@@ -166,7 +167,13 @@
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
                                 </DataGrid.Columns>
-                            </DataGrid>
+                                </DataGrid>
+                                <TextBlock x:Name="MovementsEmptyText"
+                                           Text="Todavía no hay movimientos este mes. Usa «Nuevo movimiento»."
+                                           Style="{StaticResource MutedText}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Margin="0,34,0,0" Visibility="Collapsed" />
+                            </Grid>
                         </StackPanel>
                     </Border>
 
@@ -181,8 +188,9 @@
                                         Height="30" HorizontalAlignment="Right" VerticalAlignment="Top"
                                         Click="ViewInvoices_Click" />
                             </Grid>
-                            <DataGrid ItemsSource="{Binding RecentInvoices}" Margin="0,14,0,0"
-                                      Height="212" RowHeight="38" ColumnHeaderHeight="34">
+                            <Grid Margin="0,14,0,0">
+                                <DataGrid x:Name="RecentInvoicesGrid" ItemsSource="{Binding RecentInvoices}"
+                                          Height="212" RowHeight="38" ColumnHeaderHeight="34">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Folio" Width="90" Binding="{Binding Folio}" />
                                     <DataGridTextColumn Header="Cliente" Width="*" Binding="{Binding ContactName}" />
@@ -208,7 +216,13 @@
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
                                 </DataGrid.Columns>
-                            </DataGrid>
+                                </DataGrid>
+                                <TextBlock x:Name="InvoicesEmptyText"
+                                           Text="Todavía no hay facturas. Crea la primera con «Nueva factura»."
+                                           Style="{StaticResource MutedText}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Margin="0,34,0,0" Visibility="Collapsed" />
+                            </Grid>
                         </StackPanel>
                     </Border>
                 </StackPanel>

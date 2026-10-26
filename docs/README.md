@@ -1,5 +1,17 @@
 # Libro · Documentación técnica
 
+> **Aviso de alcance.** Esta documentación describe **Libro 2.0.0**. La versión
+> vigente es **2.1.0**, que añade: protección contra la clave perdida (`H-21`),
+> recálculo de nómina sin conceptos obsoletos (`H-06`), manifiesto de Windows
+> 10/11 con DPI por monitor, versión centralizada en el `.csproj`, atajos de
+> teclado (`Ctrl+1…9`, `Alt+←/→`, `F5`, `F1`) y el **servidor local opcional de
+> ventas para el teléfono**, con cobro por terminal.
+>
+> Los documentos 01–15 siguen siendo válidos en todo lo que no contradigan esos
+> cambios. Para la versión vigente, la fuente de verdad es el `README.md` de la
+> raíz y el código. **El servidor de ventas todavía no está descrito aquí**: su
+> contrato vive en `README.md` → «Ventas por celular».
+
 Documentación curada de **Libro Contabilidad 2.0.0**: la aplicación nativa de
 Windows, su base cifrada, el instalador, el harness CLI para agentes y el código
 heredado que se conserva como referencia.

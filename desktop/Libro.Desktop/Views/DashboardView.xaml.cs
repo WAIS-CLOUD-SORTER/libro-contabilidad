@@ -44,6 +44,15 @@ public partial class DashboardView : UserControl, IRefreshable
             }
 
             StockEmptyText.Visibility = data.LowStock.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+            // Estados vacíos: sin esto las tablas quedaban en blanco y parecía
+            // que la pantalla no había cargado.
+            MovementsEmptyText.Visibility = data.RecentTransactions.Count == 0
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+            InvoicesEmptyText.Visibility = data.RecentInvoices.Count == 0
+                ? Visibility.Visible
+                : Visibility.Collapsed;
         }
         catch (Exception ex)
         {
