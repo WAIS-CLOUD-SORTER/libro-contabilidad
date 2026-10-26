@@ -1,0 +1,29 @@
+{
+  "name": "contabilidad",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Sistema de contabilidad local para negocios en Mexico",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "postbuild": "node scripts/clean-standalone.mjs",
+    "start": "next start",
+    "start:lan": "next start -H 0.0.0.0",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "lucide-react": "1.61.0",
+    "next": "15.5.28",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/node": "^24.10.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "tailwindcss": "4.3.3",
+    "typescript": "5.9.3"
+  }
+}

@@ -1,0 +1,253 @@
+<UserControl x:Class="Libro.Desktop.Views.TransactionsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:Libro.Desktop.Controls"
+             Background="Transparent">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="34,26,34,34">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Text="Movimientos" Style="{StaticResource PageTitle}" />
+                    <TextBlock Style="{StaticResource PageSubtitle}"
+                               Text="Ingresos no facturados y gastos. Las ventas con factura viven en Facturas para no duplicar." />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="NewButton" Content="Nuevo movimiento" Style="{StaticResource PrimaryButton}"
+                            Click="New_Click" />
+                </StackPanel>
+            </Grid>
+
+            <Grid Margin="0,22,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="14" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="14" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="14" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" Style="{StaticResource CardFlat}">
+                    <StackPanel>
+                        <TextBlock Text="Ingresos" Style="{StaticResource MetricLabel}" />
+                        <TextBlock x:Name="IncomeValue" Text="$0.00" Style="{StaticResource MetricValue}" />
+                        <TextBlock Text="Sin IVA" Style="{StaticResource MutedText}" Margin="0,5,0,0" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="2" Style="{StaticResource CardFlat}">
+                    <StackPanel>
+                        <TextBlock Text="Gastos" Style="{StaticResource MetricLabel}" />
+                        <TextBlock x:Name="ExpenseValue" Text="$0.00" Style="{StaticResource MetricValue}" />
+                        <TextBlock Text="Sin IVA" Style="{StaticResource MutedText}" Margin="0,5,0,0" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="4" Style="{StaticResource CardFlat}">
+                    <StackPanel>
+                        <TextBlock Text="Neto" Style="{StaticResource MetricLabel}" />
+                        <TextBlock x:Name="NetValue" Text="$0.00" Style="{StaticResource MetricValue}" />
+                        <TextBlock Text="Ingresos − gastos" Style="{StaticResource MutedText}" Margin="0,5,0,0" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="6" Style="{StaticResource CardFlat}">
+                    <StackPanel>
+                        <TextBlock Text="IVA neto" Style="{StaticResource MetricLabel}" />
+                        <TextBlock x:Name="IvaNetValue" Text="$0.00" Style="{StaticResource MetricValue}" />
+                        <TextBlock Text="Trasladado − acreditable" Style="{StaticResource MutedText}" Margin="0,5,0,0" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <Border Style="{StaticResource Card}" Margin="0,18,0,0" Padding="16">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="155" />
+                            <ColumnDefinition Width="155" />
+                            <ColumnDefinition Width="125" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                            <TextBlock Text="Desde" Style="{StaticResource FieldLabel}" />
+                            <controls:DateField x:Name="FromPicker" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Margin="0,0,10,0">
+                            <TextBlock Text="Hasta" Style="{StaticResource FieldLabel}" />
+                            <controls:DateField x:Name="ToPicker" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Margin="0,0,10,0">
+                            <TextBlock Text="Tipo" Style="{StaticResource FieldLabel}" />
+                            <ComboBox x:Name="TypeFilter" SelectedIndex="0">
+                                <ComboBoxItem Content="Todos" Tag="" />
+                                <ComboBoxItem Content="Ingresos" Tag="ingreso" />
+                                <ComboBoxItem Content="Gastos" Tag="gasto" />
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel Grid.Column="3" Margin="0,0,10,0">
+                            <TextBlock Text="Buscar" Style="{StaticResource FieldLabel}" />
+                            <TextBox x:Name="SearchBox" ToolTip="Descripción, referencia o contacto" />
+                        </StackPanel>
+                        <Button Grid.Column="4" Content="Filtrar" Style="{StaticResource SecondaryButton}"
+                                VerticalAlignment="Bottom" Click="Filter_Click" />
+                    </Grid>
+
+                    <Grid Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Categoría" Style="{StaticResource FieldLabel}" VerticalAlignment="Center"
+                                   Margin="0,0,8,0" />
+                        <ComboBox x:Name="CategoryFilter" Grid.Column="1" Width="220" Height="32"
+                                  FontSize="12" SelectedIndex="0" />
+                        <Button Grid.Column="2" Content="Limpiar filtros" Style="{StaticResource GhostButton}"
+                                HorizontalAlignment="Left" Height="30" FontSize="12" Margin="14,0,0,0"
+                                Click="Clear_Click" />
+                        <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button Content="Este mes" Style="{StaticResource GhostButton}" Height="28"
+                                    FontSize="12" Click="CurrentMonth_Click" />
+                            <Button Content="Ver todo" Style="{StaticResource GhostButton}" Height="28"
+                                    FontSize="12" Click="AllTime_Click" />
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Card}" Margin="0,16,0,0" Padding="0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid>
+                        <DataGrid x:Name="RowsGrid" Height="470" RowHeight="56" ColumnHeaderHeight="36"
+                                  MouseDoubleClick="RowsGrid_MouseDoubleClick">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Fecha" Width="104"
+                                                    Binding="{Binding Date, Converter={StaticResource Date}}" />
+                                <DataGridTemplateColumn Header="Descripción" Width="*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Description}" FontWeight="SemiBold"
+                                                           TextTrimming="CharacterEllipsis" />
+                                                <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                                    <TextBlock Text="{Binding CategoryName}" FontSize="11"
+                                                               Foreground="{StaticResource MutedBrush}" />
+                                                    <TextBlock Text="{Binding SourceNote}" FontSize="11"
+                                                               Foreground="{StaticResource WarnBrush}" Margin="7,0,0,0" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Contacto" Width="120" Binding="{Binding ContactName}" />
+                                <DataGridTextColumn Header="Cuenta" Width="112" Binding="{Binding AccountName}" />
+                                <DataGridTemplateColumn Header="Tipo" Width="82">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border x:Name="typePill" Style="{StaticResource Pill}"
+                                                    Background="{StaticResource AccentSoftBrush}">
+                                                <TextBlock x:Name="typeLabel"
+                                                           Text="{Binding Type, Converter={StaticResource StatusLabel}}"
+                                                           Foreground="{StaticResource SuccessBrush}" FontSize="10"
+                                                           FontWeight="SemiBold" />
+                                            </Border>
+                                            <DataTemplate.Triggers>
+                                                <DataTrigger Binding="{Binding Type}" Value="gasto">
+                                                    <Setter TargetName="typePill" Property="Background"
+                                                            Value="{StaticResource DangerSoftBrush}" />
+                                                    <Setter TargetName="typeLabel" Property="Foreground"
+                                                            Value="{StaticResource ExpenseBrush}" />
+                                                </DataTrigger>
+                                            </DataTemplate.Triggers>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Subtotal" Width="92">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding SubtotalCents, Converter={StaticResource Money}}"
+                                                       HorizontalAlignment="Right" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="IVA" Width="76">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding IvaCents, Converter={StaticResource Money}}"
+                                                       Foreground="{StaticResource MutedBrush}"
+                                                       HorizontalAlignment="Right" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Total" Width="102">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding TotalCents, Converter={StaticResource Money}}"
+                                                       Foreground="{Binding Type, Converter={StaticResource TypeBrush}}"
+                                                       FontWeight="SemiBold" HorizontalAlignment="Right" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="" Width="94">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
+                                                            Visibility="{Binding Source, Converter={StaticResource ManualVisibility}}">
+                                                    <Button Content="&#xE70F;" Style="{StaticResource IconButton}"
+                                                            Width="30" Height="28" ToolTip="Editar"
+                                                            Tag="{Binding}" Click="Edit_Click" />
+                                                    <Button Content="&#xE74D;" Style="{StaticResource IconButton}"
+                                                            Width="30" Height="28" ToolTip="Eliminar"
+                                                            Foreground="{StaticResource DangerBrush}"
+                                                            Tag="{Binding}" Click="Delete_Click" />
+                                                </StackPanel>
+                                                <TextBlock Text="{Binding Source, Converter={StaticResource SourceLabel}}"
+                                                           Visibility="{Binding Source, Converter={StaticResource AutomaticVisibility}}"
+                                                           FontSize="11" Foreground="{StaticResource MutedBrush}"
+                                                           HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <StackPanel x:Name="EmptyPanel" Visibility="Collapsed" HorizontalAlignment="Center"
+                                    VerticalAlignment="Center" Margin="0,48,0,60">
+                            <Border Width="44" Height="44" CornerRadius="22" Background="{StaticResource AccentSoftBrush}"
+                                    HorizontalAlignment="Center">
+                                <TextBlock Text="&#xE8A5;" FontFamily="{StaticResource IconFont}" FontSize="18"
+                                           Foreground="{StaticResource AccentBrush}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <TextBlock Text="Sin movimientos en este periodo" FontSize="15" FontWeight="SemiBold"
+                                       HorizontalAlignment="Center" Margin="0,12,0,0" />
+                            <TextBlock Text="Registra un gasto o un ingreso no facturado para empezar."
+                                       Style="{StaticResource MutedText}" HorizontalAlignment="Center"
+                                       Margin="0,4,0,0" />
+                            <Button x:Name="EmptyNewButton" Content="Nuevo movimiento" Style="{StaticResource PrimaryButton}"
+                                    HorizontalAlignment="Center" Margin="0,14,0,0" Click="New_Click" />
+                        </StackPanel>
+                    </Grid>
+
+                    <Border Grid.Row="1" BorderBrush="{StaticResource LineBrush}" BorderThickness="0,1,0,0"
+                            Padding="16,11">
+                        <Grid>
+                            <TextBlock x:Name="CountText" Text="0 movimientos" Style="{StaticResource MutedText}" />
+                            <TextBlock x:Name="SumText" HorizontalAlignment="Right" Style="{StaticResource MutedText}" />
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

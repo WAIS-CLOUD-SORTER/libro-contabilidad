@@ -1,0 +1,106 @@
+<Window x:Class="Libro.Desktop.Views.SetupWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Libro · Configuración inicial"
+        Width="980" Height="640"
+        MinWidth="900" MinHeight="600"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Background="{StaticResource CanvasBrush}">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="0.9*" />
+            <ColumnDefinition Width="1.1*" />
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Column="0" Background="{StaticResource SidebarBrush}" Padding="46">
+            <Grid>
+                <StackPanel VerticalAlignment="Top">
+                    <StackPanel Orientation="Horizontal">
+                        <Border Width="42" Height="42" CornerRadius="12" Background="#1C3A30">
+                            <TextBlock Text="&#xE8C7;" FontFamily="{StaticResource IconFont}" FontSize="20"
+                                       Foreground="#7BE0B4" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel Margin="14,2,0,0">
+                            <TextBlock Text="Libro" FontSize="24" FontWeight="SemiBold" Foreground="White" />
+                            <TextBlock Text="Contabilidad para tu negocio" FontSize="12" Foreground="{StaticResource SidebarMutedBrush}" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <TextBlock Text="Tu contabilidad, ordenada desde el primer día."
+                               FontSize="28" FontWeight="SemiBold" Foreground="White"
+                               TextWrapping="Wrap" Margin="0,48,0,0" LineHeight="36" />
+                    <TextBlock Text="Ingresos, gastos, facturas, inventario, nómina e impuestos en un solo lugar."
+                               FontSize="14" Foreground="{StaticResource SidebarMutedBrush}"
+                               TextWrapping="Wrap" Margin="0,14,0,0" LineHeight="22" />
+
+                    <StackPanel Margin="0,36,0,0">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                            <TextBlock Text="&#xE73E;" FontFamily="{StaticResource IconFont}" Foreground="#7BE0B4" FontSize="13" VerticalAlignment="Center" />
+                            <TextBlock Text="Datos guardados en tu computadora" Foreground="#D7E5DF" FontSize="13" Margin="10,0,0,0" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                            <TextBlock Text="&#xE73E;" FontFamily="{StaticResource IconFont}" Foreground="#7BE0B4" FontSize="13" VerticalAlignment="Center" />
+                            <TextBlock Text="Interfaz nativa de Windows" Foreground="#D7E5DF" FontSize="13" Margin="10,0,0,0" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE73E;" FontFamily="{StaticResource IconFont}" Foreground="#7BE0B4" FontSize="13" VerticalAlignment="Center" />
+                            <TextBlock Text="Base y respaldos cifrados" Foreground="#D7E5DF" FontSize="13" Margin="10,0,0,0" />
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+
+                <Border VerticalAlignment="Bottom" Background="#173027" CornerRadius="12" Padding="16">
+                    <StackPanel>
+                        <TextBlock Text="&#xE72E;" FontFamily="{StaticResource IconFont}" Foreground="#7BE0B4" FontSize="16" />
+                        <TextBlock Text="Protección automática" Foreground="White" FontSize="13" FontWeight="SemiBold" Margin="0,10,0,4" />
+                        <TextBlock Text="La llave de cifrado queda ligada a tu cuenta de Windows. Sin ella, la base no se puede abrir en otra computadora."
+                                   Foreground="{StaticResource SidebarMutedBrush}" FontSize="12" TextWrapping="Wrap" LineHeight="18" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="58,44,58,36">
+                <TextBlock Text="Prepara tu contabilidad" Style="{StaticResource PageTitle}" />
+                <TextBlock Text="Crea el negocio y la cuenta de administrador. Después podrás agregar más usuarios."
+                           Style="{StaticResource PageSubtitle}" Margin="0,8,0,28" />
+
+                <TextBlock Text="Nombre del negocio" Style="{StaticResource FieldLabel}" />
+                <TextBox x:Name="CompanyBox" Margin="0,0,0,14" MaxLength="120" />
+
+                <TextBlock Text="Tu nombre" Style="{StaticResource FieldLabel}" />
+                <TextBox x:Name="NameBox" Margin="0,0,0,14" MaxLength="120" />
+
+                <TextBlock Text="Correo" Style="{StaticResource FieldLabel}" />
+                <TextBox x:Name="EmailBox" Margin="0,0,0,14" MaxLength="160" />
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Contraseña" Style="{StaticResource FieldLabel}" />
+                        <PasswordBox x:Name="PasswordBox" MaxLength="200" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Confirmar contraseña" Style="{StaticResource FieldLabel}" />
+                        <PasswordBox x:Name="ConfirmBox" MaxLength="200" />
+                    </StackPanel>
+                </Grid>
+                <TextBlock Text="Mínimo 8 caracteres." Style="{StaticResource MutedText}" Margin="0,7,0,0" />
+
+                <TextBlock x:Name="ErrorText" Style="{StaticResource ErrorText}" Margin="0,16,0,0"
+                           Visibility="Collapsed" />
+
+                <Button x:Name="CreateButton" Content="Crear cuenta y entrar" Style="{StaticResource PrimaryButton}"
+                        HorizontalAlignment="Stretch" Margin="0,24,0,0" Click="CreateButton_Click" IsDefault="True" />
+                <TextBlock Text="Al crear la cuenta se genera una llave de cifrado aleatoria protegida por Windows."
+                           Style="{StaticResource MutedText}" HorizontalAlignment="Center" Margin="0,14,0,0" TextAlignment="Center" />
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Window>

@@ -1,0 +1,36 @@
+node_modules/
+.next/
+out/
+build/
+data/
+*.tsbuildinfo
+next-env.d.ts
+.env*
+!.env.example
+npm-debug.log*
+.DS_Store
+
+# Aplicación nativa
+desktop/**/bin/
+desktop/**/obj/
+tools/**/bin/
+tools/**/obj/
+agent-harness/**/bin/
+agent-harness/**/obj/
+installer/native-app/
+dist/
+backups/
+graphify-out/
+
+# Python (pruebas E2E)
+__pycache__/
+*.py[cod]
+
+# Artefactos sensibles: nunca versionar bases, llaves ni respaldos
+*.db
+*.db-wal
+*.db-shm
+*.libro
+*.plano
+clave.bin
+*.log

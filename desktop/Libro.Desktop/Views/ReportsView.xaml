@@ -1,0 +1,390 @@
+<UserControl x:Class="Libro.Desktop.Views.ReportsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:Libro.Desktop.Controls"
+             Background="Transparent">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="34,26,34,34">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Text="Reportes" Style="{StaticResource PageTitle}" />
+                    <TextBlock Style="{StaticResource PageSubtitle}"
+                               Text="Estado de resultados, flujo de efectivo y antigüedad de saldos. Resultados sin IVA; flujo con IVA." />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Content="Movimientos CSV" Style="{StaticResource SecondaryButton}"
+                            Margin="0,0,8,0" Click="ExportMovements_Click" />
+                    <Button Content="Facturas CSV" Style="{StaticResource SecondaryButton}"
+                            Click="ExportInvoices_Click" />
+                </StackPanel>
+            </Grid>
+
+            <Border Style="{StaticResource Card}" Margin="0,18,0,0" Padding="16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="180" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="180" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Desde" Style="{StaticResource FieldLabel}" />
+                        <controls:DateField x:Name="FromField" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Hasta" Style="{StaticResource FieldLabel}" />
+                        <controls:DateField x:Name="ToField" />
+                    </StackPanel>
+                    <Button Grid.Column="3" Content="Aplicar" Style="{StaticResource SecondaryButton}"
+                            VerticalAlignment="Bottom" Margin="0,0,8,0" Click="Apply_Click" />
+                    <Button Grid.Column="4" Content="Este mes" Style="{StaticResource GhostButton}"
+                            VerticalAlignment="Bottom" Margin="0,0,8,0" Click="Month_Click" />
+                    <Button Grid.Column="5" Content="Año" Style="{StaticResource GhostButton}"
+                            VerticalAlignment="Bottom" Click="Year_Click" />
+                    <TextBlock x:Name="RangeText" Grid.Column="6" HorizontalAlignment="Right"
+                               VerticalAlignment="Bottom" Style="{StaticResource MutedText}" Margin="12,0,2,10" />
+                </Grid>
+            </Border>
+
+            <Grid Margin="0,16,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="14" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="14" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="14" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" Style="{StaticResource CardFlat}">
+                    <StackPanel>
+                        <TextBlock Text="Ingresos" Style="{StaticResource MetricLabel}" />
+                        <TextBlock x:Name="IncomeValue" Text="$0.00" Style="{StaticResource MetricValue}" />
+                        <TextBlock Text="Facturado + otros, sin IVA" Style="{StaticResource MutedText}"
+                                   Margin="0,4,0,0" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="2" Style="{StaticResource CardFlat}">
+                    <StackPanel>
+                        <TextBlock Text="Gastos" Style="{StaticResource MetricLabel}" />
+                        <TextBlock x:Name="ExpenseValue" Text="$0.00" Style="{StaticResource MetricValue}" />
+                        <TextBlock Text="Sin IVA" Style="{StaticResource MutedText}" Margin="0,4,0,0" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="4" Style="{StaticResource CardFlat}">
+                    <StackPanel>
+                        <TextBlock Text="Utilidad operativa" Style="{StaticResource MetricLabel}" />
+                        <TextBlock x:Name="ProfitValue" Text="$0.00" Style="{StaticResource MetricValue}" />
+                        <TextBlock Text="Ingresos menos gastos" Style="{StaticResource MutedText}"
+                                   Margin="0,4,0,0" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="6" Style="{StaticResource CardFlat}">
+                    <StackPanel>
+                        <TextBlock Text="Flujo neto" Style="{StaticResource MetricLabel}" />
+                        <TextBlock x:Name="CashflowValue" Text="$0.00" Style="{StaticResource MetricValue}" />
+                        <TextBlock Text="Cobros + ingresos − gastos" Style="{StaticResource MutedText}"
+                                   Margin="0,4,0,0" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <Grid Margin="0,16,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.05*" />
+                    <ColumnDefinition Width="16" />
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Style="{StaticResource Card}">
+                    <StackPanel>
+                        <TextBlock Text="Estado de resultados" Style="{StaticResource SectionTitle}" />
+                        <TextBlock Text="Periodo seleccionado · cifras sin IVA" Style="{StaticResource MutedText}"
+                                   Margin="0,3,0,14" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Ventas facturadas" Foreground="{StaticResource MutedBrush}" />
+                            <TextBlock x:Name="InvoicedRevenueText" Grid.Column="1" FontWeight="SemiBold" />
+                        </Grid>
+                        <Grid Margin="0,9,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Otros ingresos" Foreground="{StaticResource MutedBrush}" />
+                            <TextBlock x:Name="OtherIncomeText" Grid.Column="1" FontWeight="SemiBold" />
+                        </Grid>
+                        <Grid Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Total ingresos" FontWeight="SemiBold" />
+                            <TextBlock x:Name="TotalIncomeText" Grid.Column="1" FontWeight="SemiBold" />
+                        </Grid>
+                        <Border Height="1" Background="{StaticResource LineBrush}" Margin="0,12" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Total gastos" Foreground="{StaticResource MutedBrush}" />
+                            <TextBlock x:Name="TotalExpenseText" Grid.Column="1" FontWeight="SemiBold"
+                                       Foreground="{StaticResource DangerBrush}" />
+                        </Grid>
+                        <Border Background="{StaticResource ElevatedBrush}" CornerRadius="10" Padding="12,9"
+                                Margin="0,14,0,0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Utilidad operativa" FontWeight="SemiBold" />
+                                <TextBlock x:Name="OperatingProfitText" Grid.Column="1" FontSize="17"
+                                           FontWeight="SemiBold" />
+                            </Grid>
+                        </Border>
+                        <Border Height="1" Background="{StaticResource LineBrush}" Margin="0,14" />
+                        <TextBlock Text="REFERENCIA DE COSTO DE VENTAS" FontSize="10" FontWeight="SemiBold"
+                                   Foreground="{StaticResource MutedBrush}" />
+                        <Grid Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Costo de productos facturados" Foreground="{StaticResource MutedBrush}" />
+                            <TextBlock x:Name="CogsText" Grid.Column="1" />
+                        </Grid>
+                        <Grid Margin="0,6,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Margen bruto de referencia" Foreground="{StaticResource MutedBrush}" />
+                            <TextBlock x:Name="MarginText" Grid.Column="1" FontWeight="SemiBold" />
+                        </Grid>
+                        <TextBlock Style="{StaticResource MutedText}" Margin="0,8,0,0" FontSize="10.5"
+                                   TextWrapping="Wrap"
+                                   Text="Calculado con el costo promedio al momento de facturar. No descuenta compras de inventario no vendidas." />
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="2" Style="{StaticResource Card}" Padding="0">
+                    <StackPanel>
+                        <StackPanel Margin="20,18,20,10">
+                            <TextBlock Text="Ingresos vs. gastos" Style="{StaticResource SectionTitle}" />
+                            <TextBlock x:Name="PerformanceSubtitle" Style="{StaticResource MutedText}"
+                                       Margin="0,3,0,0" />
+                        </StackPanel>
+                        <DataGrid x:Name="PerformanceGrid" Height="300" RowHeight="42" ColumnHeaderHeight="34"
+                                  BorderThickness="0">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Mes" Width="68" Binding="{Binding Label}" />
+                                <DataGridTemplateColumn Header="Ingresos" Width="*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding IncomeCents, Converter={StaticResource Money}}"
+                                                       HorizontalAlignment="Right" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Gastos" Width="*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding ExpenseCents, Converter={StaticResource Money}}"
+                                                       HorizontalAlignment="Right" Foreground="{StaticResource MutedBrush}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Utilidad" Width="*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding ProfitCents, Converter={StaticResource Money}}"
+                                                       HorizontalAlignment="Right" FontWeight="SemiBold" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        <TextBlock Style="{StaticResource MutedText}" Margin="20,10,20,16"
+                                   Text="Los importes de utilidad por mes pueden incluir compras de inventario del periodo." />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <Grid Margin="0,16,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="16" />
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Style="{StaticResource Card}">
+                    <StackPanel>
+                        <TextBlock Text="Gastos por categoría" Style="{StaticResource SectionTitle}" />
+                        <TextBlock x:Name="CategorySubtitle" Style="{StaticResource MutedText}" Margin="0,3,0,10" />
+                        <ItemsControl x:Name="CategoryList">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Margin="0,0,0,12">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="{Binding Name}" FontSize="12" FontWeight="Medium" />
+                                            <TextBlock Text="{Binding AmountLabel}" Grid.Column="1" FontSize="12"
+                                                       Foreground="{StaticResource MutedBrush}" />
+                                        </Grid>
+                                        <ProgressBar Height="6" Margin="0,6,0,0" Maximum="100"
+                                                     Value="{Binding Percent}" Foreground="{StaticResource AccentBrush}"
+                                                     Background="{StaticResource ElevatedBrush}" BorderThickness="0" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock x:Name="NoCategoriesText" Text="Sin gastos en el periodo."
+                                   Style="{StaticResource MutedText}" Visibility="Collapsed" />
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="2" Style="{StaticResource Card}">
+                    <StackPanel>
+                        <TextBlock Text="Antigüedad de saldos" Style="{StaticResource SectionTitle}" />
+                        <TextBlock Text="Facturas emitidas con saldo pendiente" Style="{StaticResource MutedText}"
+                                   Margin="0,3,0,10" />
+                        <ItemsControl x:Name="AgingList">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding Label}" FontSize="12" />
+                                        <TextBlock Grid.Column="1" Text="{Binding Count}" FontSize="11"
+                                                   Foreground="{StaticResource MutedBrush}" Margin="0,0,12,0" />
+                                        <TextBlock Grid.Column="2" Text="{Binding AmountLabel}" FontSize="12"
+                                                   FontWeight="SemiBold" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <Border Height="1" Background="{StaticResource LineBrush}" Margin="0,4,0,10" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Total por cobrar" FontWeight="SemiBold" />
+                            <TextBlock x:Name="AgingTotalText" Grid.Column="1" FontWeight="SemiBold" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <Grid Margin="0,16,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.4*" />
+                    <ColumnDefinition Width="16" />
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" Style="{StaticResource Card}" Padding="0">
+                    <StackPanel>
+                        <StackPanel Margin="20,18,20,8">
+                            <TextBlock Text="Facturas con saldo" Style="{StaticResource SectionTitle}" />
+                            <TextBlock x:Name="AgingInvoicesSubtitle" Style="{StaticResource MutedText}"
+                                       Margin="0,3,0,0" />
+                        </StackPanel>
+                        <DataGrid x:Name="AgingGrid" Height="210" RowHeight="38" ColumnHeaderHeight="34"
+                                  BorderThickness="0">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Folio" Width="88" Binding="{Binding Folio}" />
+                                <DataGridTextColumn Header="Cliente" Width="*" Binding="{Binding ContactName}" />
+                                <DataGridTemplateColumn Header="Vence" Width="86">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding DueDate, Converter={StaticResource Date}}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Estado" Width="96" Binding="{Binding DueLabel}" />
+                                <DataGridTemplateColumn Header="Saldo" Width="96">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding BalanceCents, Converter={StaticResource Money}}"
+                                                       HorizontalAlignment="Right" FontWeight="SemiBold" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </Border>
+
+                <StackPanel Grid.Column="2">
+                    <Border Style="{StaticResource Card}">
+                        <StackPanel>
+                            <TextBlock Text="Saldos de cuentas" Style="{StaticResource SectionTitle}" />
+                            <ItemsControl x:Name="AccountsList" Margin="0,10,0,0">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,0,0,7">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="{Binding Name}" FontSize="12" />
+                                            <TextBlock Grid.Column="1" Text="{Binding BalanceLabel}" FontSize="12"
+                                                       FontWeight="SemiBold" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource Card}" Margin="0,16,0,0">
+                        <StackPanel>
+                            <TextBlock Text="Inventario" Style="{StaticResource SectionTitle}" />
+                            <Grid Margin="0,10,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Valor del inventario" Foreground="{StaticResource MutedBrush}" />
+                                <TextBlock x:Name="InventoryValueText" Grid.Column="1" FontWeight="SemiBold" />
+                            </Grid>
+                            <Grid Margin="0,7,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Productos activos" Foreground="{StaticResource MutedBrush}" />
+                                <TextBlock x:Name="InventoryCountText" Grid.Column="1" />
+                            </Grid>
+                            <Grid Margin="0,7,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Bajo stock / agotados" Foreground="{StaticResource MutedBrush}" />
+                                <TextBlock x:Name="InventoryLowText" Grid.Column="1" />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

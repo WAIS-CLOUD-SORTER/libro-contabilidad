@@ -1,0 +1,308 @@
+<UserControl x:Class="Libro.Desktop.Views.DashboardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="Transparent">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="34,26,34,34">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Text="Panel" Style="{StaticResource PageTitle}" />
+                    <TextBlock x:Name="SubtitleText" Style="{StaticResource PageSubtitle}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Content="Nueva factura" Style="{StaticResource SecondaryButton}"
+                            Margin="0,0,10,0" Click="NewInvoice_Click" />
+                    <Button Content="Nuevo movimiento" Style="{StaticResource PrimaryButton}"
+                            Click="NewTransaction_Click" />
+                </StackPanel>
+            </Grid>
+
+            <Grid Margin="0,24,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="14" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="14" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="14" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Style="{StaticResource CardFlat}">
+                    <StackPanel>
+                        <Grid>
+                            <TextBlock Text="Ingresos del mes" Style="{StaticResource MetricLabel}" />
+                            <TextBlock Text="&#xE8C7;" FontFamily="{StaticResource IconFont}" FontSize="14"
+                                       Foreground="{StaticResource AccentBrush}" HorizontalAlignment="Right" />
+                        </Grid>
+                        <TextBlock Text="{Binding TotalIncomeCents, Converter={StaticResource Money}}"
+                                   Style="{StaticResource MetricValue}" />
+                        <TextBlock Text="Facturado + otros ingresos" Style="{StaticResource MutedText}" Margin="0,6,0,0" />
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="2" Style="{StaticResource CardFlat}">
+                    <StackPanel>
+                        <Grid>
+                            <TextBlock Text="Gastos del mes" Style="{StaticResource MetricLabel}" />
+                            <TextBlock Text="&#xE8C7;" FontFamily="{StaticResource IconFont}" FontSize="14"
+                                       Foreground="{StaticResource ExpenseBrush}" HorizontalAlignment="Right" />
+                        </Grid>
+                        <TextBlock Text="{Binding ExpenseCents, Converter={StaticResource Money}}"
+                                   Style="{StaticResource MetricValue}" />
+                        <TextBlock Text="Compras y gastos deducibles" Style="{StaticResource MutedText}" Margin="0,6,0,0" />
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="4" Style="{StaticResource CardFlat}">
+                    <StackPanel>
+                        <Grid>
+                            <TextBlock Text="Utilidad del mes" Style="{StaticResource MetricLabel}" />
+                            <TextBlock Text="&#xE9D2;" FontFamily="{StaticResource IconFont}" FontSize="14"
+                                       Foreground="{StaticResource SuccessBrush}" HorizontalAlignment="Right" />
+                        </Grid>
+                        <TextBlock x:Name="ProfitValue" Text="{Binding ProfitCents, Converter={StaticResource Money}}"
+                                   Style="{StaticResource MetricValue}" />
+                        <TextBlock Text="Ingresos menos gastos" Style="{StaticResource MutedText}" Margin="0,6,0,0" />
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="6" Style="{StaticResource CardFlat}">
+                    <StackPanel>
+                        <Grid>
+                            <TextBlock Text="Efectivo y bancos" Style="{StaticResource MetricLabel}" />
+                            <TextBlock Text="&#xE825;" FontFamily="{StaticResource IconFont}" FontSize="14"
+                                       Foreground="{StaticResource InfoBrush}" HorizontalAlignment="Right" />
+                        </Grid>
+                        <TextBlock Text="{Binding CashCents, Converter={StaticResource Money}}"
+                                   Style="{StaticResource MetricValue}" />
+                        <TextBlock Text="Saldo de tus cuentas" Style="{StaticResource MutedText}" Margin="0,6,0,0" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <Grid Margin="0,14,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="14" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="14" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="14" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Style="{StaticResource CardFlat}">
+                    <StackPanel>
+                        <TextBlock Text="IVA trasladado" Style="{StaticResource MetricLabel}" />
+                        <TextBlock Text="{Binding IvaTrasladadoCents, Converter={StaticResource Money}}"
+                                   FontSize="18" FontWeight="SemiBold" />
+                        <TextBlock Text="Cobrado en ventas" Style="{StaticResource MutedText}" Margin="0,4,0,0" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="2" Style="{StaticResource CardFlat}">
+                    <StackPanel>
+                        <TextBlock Text="IVA acreditable" Style="{StaticResource MetricLabel}" />
+                        <TextBlock Text="{Binding IvaAcreditableCents, Converter={StaticResource Money}}"
+                                   FontSize="18" FontWeight="SemiBold" />
+                        <TextBlock Text="Pagado en gastos" Style="{StaticResource MutedText}" Margin="0,4,0,0" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="4" Style="{StaticResource CardFlat}">
+                    <StackPanel>
+                        <TextBlock Text="Por cobrar" Style="{StaticResource MetricLabel}" />
+                        <TextBlock Text="{Binding ReceivableCents, Converter={StaticResource Money}}"
+                                   FontSize="18" FontWeight="SemiBold" />
+                        <TextBlock x:Name="OverdueText" Style="{StaticResource MutedText}" Margin="0,4,0,0" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="6" Style="{StaticResource CardFlat}">
+                    <StackPanel>
+                        <TextBlock Text="Inventario" Style="{StaticResource MetricLabel}" />
+                        <TextBlock Text="{Binding InventoryCents, Converter={StaticResource Money}}"
+                                   FontSize="18" FontWeight="SemiBold" />
+                        <TextBlock Text="Valor al costo" Style="{StaticResource MutedText}" Margin="0,4,0,0" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <Grid Margin="0,20,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2.1*" />
+                    <ColumnDefinition Width="18" />
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <Border Style="{StaticResource Card}" Padding="18">
+                        <StackPanel>
+                            <Grid>
+                                <StackPanel>
+                                    <TextBlock Text="Últimos movimientos" Style="{StaticResource SectionTitle}" />
+                                    <TextBlock Text="Ingresos y gastos recientes" Style="{StaticResource MutedText}" Margin="0,4,0,0" />
+                                </StackPanel>
+                                <Button Content="Ver todos" Style="{StaticResource GhostButton}" FontSize="12"
+                                        Height="30" HorizontalAlignment="Right" VerticalAlignment="Top"
+                                        Click="ViewTransactions_Click" />
+                            </Grid>
+                            <DataGrid ItemsSource="{Binding RecentTransactions}" Margin="0,14,0,0"
+                                      Height="236" RowHeight="38" ColumnHeaderHeight="34">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Fecha" Width="90"
+                                                        Binding="{Binding Date, Converter={StaticResource Date}}" />
+                                    <DataGridTextColumn Header="Descripción" Width="*" Binding="{Binding Description}" />
+                                    <DataGridTextColumn Header="Categoría" Width="145" Binding="{Binding CategoryName}" />
+                                    <DataGridTemplateColumn Header="Monto" Width="115">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding TotalCents, Converter={StaticResource Money}}"
+                                                           Foreground="{Binding Type, Converter={StaticResource TypeBrush}}"
+                                                           FontWeight="SemiBold" HorizontalAlignment="Right" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource Card}" Padding="18" Margin="0,16,0,0">
+                        <StackPanel>
+                            <Grid>
+                                <StackPanel>
+                                    <TextBlock Text="Facturas recientes" Style="{StaticResource SectionTitle}" />
+                                    <TextBlock Text="Documentos internos · No son CFDI" Style="{StaticResource MutedText}" Margin="0,4,0,0" />
+                                </StackPanel>
+                                <Button Content="Ver todas" Style="{StaticResource GhostButton}" FontSize="12"
+                                        Height="30" HorizontalAlignment="Right" VerticalAlignment="Top"
+                                        Click="ViewInvoices_Click" />
+                            </Grid>
+                            <DataGrid ItemsSource="{Binding RecentInvoices}" Margin="0,14,0,0"
+                                      Height="212" RowHeight="38" ColumnHeaderHeight="34">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Folio" Width="90" Binding="{Binding Folio}" />
+                                    <DataGridTextColumn Header="Cliente" Width="*" Binding="{Binding ContactName}" />
+                                    <DataGridTextColumn Header="Fecha" Width="90"
+                                                        Binding="{Binding Date, Converter={StaticResource Date}}" />
+                                    <DataGridTemplateColumn Header="Total" Width="110">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding TotalCents, Converter={StaticResource Money}}"
+                                                           FontWeight="SemiBold" HorizontalAlignment="Right" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Estado" Width="92">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Border Style="{StaticResource Pill}" HorizontalAlignment="Left"
+                                                        Background="{Binding Status, Converter={StaticResource StatusBrush}}">
+                                                    <TextBlock Text="{Binding Status, Converter={StaticResource StatusLabel}}"
+                                                               Foreground="White" FontSize="10" FontWeight="SemiBold" />
+                                                </Border>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2">
+                    <Border Style="{StaticResource Card}" Padding="18">
+                        <StackPanel>
+                            <TextBlock Text="Últimos 6 meses" Style="{StaticResource SectionTitle}" />
+                            <TextBlock Text="Ingresos y gastos" Style="{StaticResource MutedText}" Margin="0,4,0,0" />
+                            <ItemsControl ItemsSource="{Binding Monthly}" Margin="0,18,0,0">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <UniformGrid Columns="6" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Margin="3,0">
+                                            <Grid Height="116">
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"
+                                                            VerticalAlignment="Bottom">
+                                                    <Rectangle Width="9" Height="{Binding IncomeHeight}" RadiusX="3" RadiusY="3"
+                                                               Fill="{StaticResource AccentBrush}" Margin="0,0,4,0"
+                                                               VerticalAlignment="Bottom" />
+                                                    <Rectangle Width="9" Height="{Binding ExpenseHeight}" RadiusX="3" RadiusY="3"
+                                                               Fill="{StaticResource ExpenseBrush}" Margin="0,0,0,0"
+                                                               VerticalAlignment="Bottom" />
+                                                </StackPanel>
+                                            </Grid>
+                                            <TextBlock Text="{Binding Label}" FontSize="10" Foreground="{StaticResource MutedBrush}"
+                                                       HorizontalAlignment="Center" Margin="0,6,0,0" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,12,0,0">
+                                <Rectangle Width="8" Height="8" RadiusX="2" RadiusY="2" Fill="{StaticResource AccentBrush}" />
+                                <TextBlock Text="Ingresos" FontSize="10" Foreground="{StaticResource MutedBrush}" Margin="5,0,12,0" />
+                                <Rectangle Width="8" Height="8" RadiusX="2" RadiusY="2" Fill="{StaticResource ExpenseBrush}" />
+                                <TextBlock Text="Gastos" FontSize="10" Foreground="{StaticResource MutedBrush}" Margin="5,0,0,0" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource Card}" Padding="18" Margin="0,16,0,0">
+                        <StackPanel>
+                            <TextBlock Text="Cobros" Style="{StaticResource SectionTitle}" />
+                            <TextBlock Text="Facturas emitidas pendientes de pago" Style="{StaticResource MutedText}" Margin="0,4,0,0" />
+                            <TextBlock Text="{Binding ReceivableCents, Converter={StaticResource Money}}"
+                                       FontSize="26" FontWeight="SemiBold" Margin="0,16,0,0" />
+                            <Border x:Name="OverdueBadge" Style="{StaticResource Pill}" Background="{StaticResource WarnSoftBrush}"
+                                    HorizontalAlignment="Left" Margin="0,10,0,0">
+                                <TextBlock x:Name="OverdueBadgeText" Text="Sin vencimientos" Foreground="{StaticResource WarnBrush}"
+                                           FontSize="11" FontWeight="SemiBold" />
+                            </Border>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource Card}" Padding="18" Margin="0,16,0,0">
+                        <StackPanel>
+                            <Grid>
+                                <TextBlock Text="Stock bajo" Style="{StaticResource SectionTitle}" />
+                                <TextBlock Text="&#xE7BA;" FontFamily="{StaticResource IconFont}" FontSize="14"
+                                           Foreground="{StaticResource WarnBrush}" HorizontalAlignment="Right" />
+                            </Grid>
+                            <TextBlock Text="Productos en o por debajo del mínimo" Style="{StaticResource MutedText}" Margin="0,4,0,10" />
+                            <ItemsControl ItemsSource="{Binding LowStock}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,7,0,7">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="SemiBold"
+                                                           TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Text="{Binding Stock, StringFormat={}{0:0.###} piezas}"
+                                                           FontSize="11" Foreground="{StaticResource MutedBrush}" Margin="0,2,0,0" />
+                                            </StackPanel>
+                                            <Border Grid.Column="1" Style="{StaticResource Pill}" Background="{StaticResource WarnSoftBrush}">
+                                                <TextBlock Text="Bajo" Foreground="{StaticResource WarnBrush}" FontSize="10"
+                                                           FontWeight="SemiBold" />
+                                            </Border>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <TextBlock x:Name="StockEmptyText" Text="Todo el inventario está en orden."
+                                       Style="{StaticResource MutedText}" Visibility="Collapsed" Margin="0,8,0,0" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

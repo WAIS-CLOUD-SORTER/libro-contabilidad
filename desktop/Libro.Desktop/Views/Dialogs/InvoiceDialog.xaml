@@ -1,0 +1,220 @@
+<Window x:Class="Libro.Desktop.Views.Dialogs.InvoiceDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:Libro.Desktop.Controls"
+        Title="Factura · Libro"
+        Width="1180" Height="900"
+        MinWidth="1040" MinHeight="760"
+        WindowStartupLocation="CenterOwner"
+        Background="{StaticResource CanvasBrush}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="{StaticResource SurfaceBrush}"
+                BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="28,20">
+            <Grid>
+                <StackPanel>
+                    <TextBlock x:Name="TitleText" Text="Nueva factura" Style="{StaticResource PageTitle}" FontSize="25" />
+                    <TextBlock x:Name="SubtitleText" Style="{StaticResource PageSubtitle}"
+                               Text="Documento interno de control. No es CFDI ni comprobante fiscal." />
+                </StackPanel>
+                <Border HorizontalAlignment="Right" VerticalAlignment="Center"
+                        Background="{StaticResource WarnSoftBrush}" CornerRadius="99" Padding="10,4">
+                    <TextBlock Text="No es CFDI" Foreground="{StaticResource WarnBrush}"
+                               FontSize="11" FontWeight="SemiBold" />
+                </Border>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1" Margin="28,20,28,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="20" />
+                <ColumnDefinition Width="330" />
+            </Grid.ColumnDefinitions>
+
+            <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <StackPanel>
+                    <Border Style="{StaticResource Card}">
+                        <StackPanel>
+                            <TextBlock Text="Datos de la factura" Style="{StaticResource SectionTitle}" />
+                            <StackPanel Margin="0,14,0,0">
+                                <TextBlock Text="Cliente" Style="{StaticResource FieldLabel}" />
+                                <ComboBox x:Name="ClientBox" DisplayMemberPath="DisplayName"
+                                          SelectedValuePath="Id" />
+                                <TextBlock x:Name="NoClientsText" Style="{StaticResource ErrorText}"
+                                           Text="No hay clientes registrados. Crea un contacto de tipo cliente antes de facturar."
+                                           Visibility="Collapsed" Margin="0,6,0,0" />
+                            </StackPanel>
+
+                            <Grid Margin="0,14,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="16" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Fecha de emisión" Style="{StaticResource FieldLabel}" />
+                                    <controls:DateField x:Name="InvoiceDate" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Vencimiento" Style="{StaticResource FieldLabel}" />
+                                    <controls:DateField x:Name="DueDate" />
+                                </StackPanel>
+                            </Grid>
+
+                            <StackPanel Margin="0,14,0,0">
+                                <TextBlock Text="Condiciones de pago" Style="{StaticResource FieldLabel}" />
+                                <TextBox x:Name="TermsBox" MaxLength="200" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource Card}" Margin="0,16,0,0" Padding="0">
+                        <StackPanel>
+                            <Border Padding="18,16,18,12">
+                                <Grid>
+                                    <StackPanel>
+                                        <TextBlock Text="Conceptos" Style="{StaticResource SectionTitle}" />
+                                        <TextBlock Text="Precios sin IVA. El IVA se calcula por concepto."
+                                                   Style="{StaticResource MutedText}" Margin="0,3,0,0" />
+                                    </StackPanel>
+                                    <Button Content="Agregar concepto" Style="{StaticResource SecondaryButton}"
+                                            HorizontalAlignment="Right" VerticalAlignment="Center"
+                                            Click="AddLine_Click" />
+                                </Grid>
+                            </Border>
+
+                            <DataGrid x:Name="LinesGrid" AutoGenerateColumns="False"
+                                      CanUserAddRows="False" CanUserDeleteRows="False"
+                                      CanUserSortColumns="False" SelectionUnit="FullRow"
+                                      HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                                      RowHeight="56" ColumnHeaderHeight="34" Height="252"
+                                      Margin="0,0,0,0">
+                                <DataGrid.Columns>
+                                    <DataGridTemplateColumn Header="Producto" Width="220">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <ComboBox ItemsSource="{Binding Products, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                                          DisplayMemberPath="DisplayName" SelectedValuePath="Id"
+                                                          SelectedValue="{Binding ProductId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                          SelectionChanged="Product_SelectionChanged"
+                                                          FontSize="12" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Descripción" Width="*">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBox Text="{Binding Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                         MaxLength="300" Style="{StaticResource CellTextBox}" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Cant." Width="70">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBox Text="{Binding QtyText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                         HorizontalContentAlignment="Right" Style="{StaticResource CellTextBox}" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Precio" Width="92">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBox Text="{Binding PriceText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                         HorizontalContentAlignment="Right" Style="{StaticResource CellTextBox}" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="IVA" Width="94">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <ComboBox ItemsSource="{Binding IvaOptions, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                                          DisplayMemberPath="Label" SelectedValuePath="Rate"
+                                                          SelectedValue="{Binding IvaRate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                          FontSize="12" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Importe" Width="98">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding SubtotalLabel}" FontWeight="SemiBold"
+                                                           HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="" Width="38">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button Content="&#xE74D;" Style="{StaticResource IconButton}"
+                                                        Width="28" Height="28" Foreground="{StaticResource DangerBrush}"
+                                                        ToolTip="Quitar concepto" Tag="{Binding}" Click="RemoveLine_Click" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource Card}" Margin="0,16,0,0">
+                        <StackPanel>
+                            <TextBlock Text="Notas" Style="{StaticResource SectionTitle}" />
+                            <TextBox x:Name="NotesBox" Height="86" AcceptsReturn="True" TextWrapping="Wrap"
+                                     VerticalContentAlignment="Top" Padding="10,8" MaxLength="2000"
+                                     Margin="0,10,0,0" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <StackPanel>
+                    <Border Style="{StaticResource Card}">
+                        <StackPanel>
+                            <TextBlock Text="Resumen" Style="{StaticResource SectionTitle}" />
+                            <Grid Margin="0,16,0,0">
+                                <TextBlock Text="Subtotal" Style="{StaticResource MutedText}" />
+                                <TextBlock x:Name="SubtotalValue" Text="$0.00" HorizontalAlignment="Right" />
+                            </Grid>
+                            <Grid Margin="0,10,0,0">
+                                <TextBlock Text="IVA" Style="{StaticResource MutedText}" />
+                                <TextBlock x:Name="IvaValue" Text="$0.00" HorizontalAlignment="Right" />
+                            </Grid>
+                            <Border Background="{StaticResource ElevatedBrush}" CornerRadius="9" Padding="12"
+                                    Margin="0,14,0,0">
+                                <Grid>
+                                    <TextBlock Text="Total" FontWeight="SemiBold" />
+                                    <TextBlock x:Name="TotalValue" Text="$0.00" HorizontalAlignment="Right"
+                                               FontSize="19" FontWeight="SemiBold" />
+                                </Grid>
+                            </Border>
+                            <TextBlock Style="{StaticResource MutedText}" Margin="0,14,0,0"
+                                       Text="Al emitir se asigna folio y se descuenta el inventario de los productos incluidos. Los borradores no afectan reportes." />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource Card}" Margin="0,16,0,0">
+                        <StackPanel>
+                            <TextBlock x:Name="ErrorText" Style="{StaticResource ErrorText}" Margin="0,0,0,10" />
+                            <Button x:Name="EmitButton" Content="Emitir factura" Style="{StaticResource PrimaryButton}"
+                                    Click="Emit_Click" />
+                            <Button x:Name="SaveDraftButton" Content="Guardar borrador"
+                                    Style="{StaticResource SecondaryButton}" Margin="0,8,0,0"
+                                    Click="SaveDraft_Click" />
+                            <Button Content="Cancelar" Style="{StaticResource GhostButton}" Margin="0,8,0,0"
+                                    IsCancel="True" Click="Cancel_Click" />
+                            <TextBlock Style="{StaticResource MutedText}" HorizontalAlignment="Center"
+                                       Margin="0,12,0,0" Text="Documento interno. No genera CFDI." />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</Window>

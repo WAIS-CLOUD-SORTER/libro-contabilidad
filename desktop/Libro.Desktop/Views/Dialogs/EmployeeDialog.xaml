@@ -1,0 +1,147 @@
+<Window x:Class="Libro.Desktop.Views.Dialogs.EmployeeDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:Libro.Desktop.Controls"
+        Title="Empleado · Libro"
+        Width="780" Height="800"
+        WindowStartupLocation="CenterOwner"
+        Background="{StaticResource CanvasBrush}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="{StaticResource SurfaceBrush}"
+                BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="26,20">
+            <StackPanel>
+                <TextBlock x:Name="TitleText" Text="Nuevo empleado" Style="{StaticResource PageTitle}"
+                           FontSize="24" />
+                <TextBlock x:Name="SubtitleText" Style="{StaticResource PageSubtitle}"
+                           Text="Datos laborales y fiscales para el cálculo de nómina." />
+            </StackPanel>
+        </Border>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="26,18,26,18">
+                <Border Style="{StaticResource Card}">
+                    <StackPanel>
+                        <TextBlock Text="Datos personales" Style="{StaticResource SectionTitle}" />
+                        <StackPanel Margin="0,14,0,0">
+                            <TextBlock Text="Nombre completo" Style="{StaticResource FieldLabel}" />
+                            <TextBox x:Name="NameBox" MaxLength="160" />
+                        </StackPanel>
+                        <Grid Margin="0,14,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="16" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="16" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="RFC" Style="{StaticResource FieldLabel}" />
+                                <TextBox x:Name="RfcBox" MaxLength="20" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="CURP" Style="{StaticResource FieldLabel}" />
+                                <TextBox x:Name="CurpBox" MaxLength="30" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="4">
+                                <TextBlock Text="NSS" Style="{StaticResource FieldLabel}" />
+                                <TextBox x:Name="NssBox" MaxLength="30" />
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource Card}" Margin="0,14,0,0">
+                    <StackPanel>
+                        <TextBlock Text="Datos laborales" Style="{StaticResource SectionTitle}" />
+                        <Grid Margin="0,14,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="16" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Puesto" Style="{StaticResource FieldLabel}" />
+                                <TextBox x:Name="PositionBox" MaxLength="120" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Departamento" Style="{StaticResource FieldLabel}" />
+                                <TextBox x:Name="DepartmentBox" MaxLength="120" />
+                            </StackPanel>
+                        </Grid>
+                        <Grid Margin="0,14,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="16" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="16" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Sueldo mensual" Style="{StaticResource FieldLabel}" />
+                                <TextBox x:Name="SalaryBox" HorizontalContentAlignment="Right" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Fecha de ingreso" Style="{StaticResource FieldLabel}" />
+                                <controls:DateField x:Name="StartDate" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="4">
+                                <TextBlock Text="Fecha de baja" Style="{StaticResource FieldLabel}" />
+                                <controls:DateField x:Name="EndDate" />
+                            </StackPanel>
+                        </Grid>
+                        <Grid Margin="0,14,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="16" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="16" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Estatus" Style="{StaticResource FieldLabel}" />
+                                <ComboBox x:Name="StatusBox" SelectedIndex="0">
+                                    <ComboBoxItem Content="Activo" Tag="activo" />
+                                    <ComboBoxItem Content="Inactivo" Tag="inactivo" />
+                                </ComboBox>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Banco" Style="{StaticResource FieldLabel}" />
+                                <TextBox x:Name="BankNameBox" MaxLength="120" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="4">
+                                <TextBlock Text="Cuenta bancaria" Style="{StaticResource FieldLabel}" />
+                                <TextBox x:Name="BankAccountBox" MaxLength="40" />
+                            </StackPanel>
+                        </Grid>
+                        <TextBlock Style="{StaticResource MutedText}" Margin="0,10,0,0"
+                                   Text="La fecha de baja es opcional. El sueldo es mensual y se prorratea en nómina." />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Border Grid.Row="2" Background="{StaticResource SurfaceBrush}"
+                BorderBrush="{StaticResource LineBrush}" BorderThickness="0,1,0,0" Padding="26,14">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock x:Name="ErrorText" Style="{StaticResource ErrorText}" VerticalAlignment="Center"
+                           Margin="0,0,16,0" />
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button Content="Cancelar" Style="{StaticResource SecondaryButton}" IsCancel="True"
+                            Margin="0,0,10,0" />
+                    <Button Content="Guardar empleado" Style="{StaticResource PrimaryButton}"
+                            IsDefault="True" Click="Save_Click" />
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

@@ -1,0 +1,95 @@
+<Window x:Class="Libro.Desktop.Views.Dialogs.PaymentDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:Libro.Desktop.Controls"
+        Width="600" Height="650"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        Background="{StaticResource CanvasBrush}"
+        Title="Pago · Libro">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="{StaticResource SurfaceBrush}"
+                BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="26,20">
+            <StackPanel>
+                <TextBlock Text="Registrar pago" Style="{StaticResource PageTitle}" FontSize="24" />
+                <TextBlock x:Name="SubtitleText" Style="{StaticResource PageSubtitle}" />
+            </StackPanel>
+        </Border>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="26,18,26,18">
+                <Border Style="{StaticResource Card}">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="16" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Monto" Style="{StaticResource FieldLabel}" />
+                                <TextBox x:Name="AmountBox" HorizontalContentAlignment="Right"
+                                         FontSize="17" FontWeight="SemiBold" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Fecha" Style="{StaticResource FieldLabel}" />
+                                <controls:DateField x:Name="PaymentDate" />
+                            </StackPanel>
+                        </Grid>
+
+                        <StackPanel Margin="0,14,0,0">
+                            <TextBlock Text="Cuenta de efectivo" Style="{StaticResource FieldLabel}" />
+                            <ComboBox x:Name="AccountBox" DisplayMemberPath="Name" SelectedValuePath="Id" />
+                        </StackPanel>
+
+                        <Grid Margin="0,14,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="16" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Método" Style="{StaticResource FieldLabel}" />
+                                <ComboBox x:Name="MethodBox" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Referencia" Style="{StaticResource FieldLabel}" />
+                                <TextBox x:Name="ReferenceBox" MaxLength="120" />
+                            </StackPanel>
+                        </Grid>
+
+                        <StackPanel Margin="0,14,0,0">
+                            <TextBlock Text="Notas" Style="{StaticResource FieldLabel}" />
+                            <TextBox x:Name="NotesBox" MaxLength="300" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Border Grid.Row="2" Background="{StaticResource SurfaceBrush}"
+                BorderBrush="{StaticResource LineBrush}" BorderThickness="0,1,0,0" Padding="26,14">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock x:Name="ErrorText" Style="{StaticResource ErrorText}" VerticalAlignment="Center"
+                           Margin="0,0,16,0" />
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button Content="Cancelar" Style="{StaticResource SecondaryButton}" IsCancel="True"
+                            Margin="0,0,10,0" />
+                    <Button x:Name="SaveButton" Content="Registrar pago" Style="{StaticResource PrimaryButton}"
+                            IsDefault="True" Click="Save_Click" />
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

@@ -1,0 +1,241 @@
+<UserControl x:Class="Libro.Desktop.Views.InvoicesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="Transparent">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="34,26,34,34">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Text="Facturas" Style="{StaticResource PageTitle}" />
+                    <TextBlock Style="{StaticResource PageSubtitle}"
+                               Text="Controla lo que facturas, lo que te deben y los pagos recibidos. Documento interno; no genera CFDI." />
+                </StackPanel>
+                <Button x:Name="NewButton" Grid.Column="1" Content="Nueva factura"
+                        Style="{StaticResource PrimaryButton}" VerticalAlignment="Center" Click="New_Click" />
+            </Grid>
+
+            <Grid Margin="0,22,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="14" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="14" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="14" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" Style="{StaticResource CardFlat}">
+                    <StackPanel>
+                        <TextBlock Text="Por cobrar" Style="{StaticResource MetricLabel}" />
+                        <TextBlock x:Name="ReceivableValue" Text="$0.00" Style="{StaticResource MetricValue}" />
+                        <TextBlock x:Name="OverdueHint" Text="0 factura(s) vencida(s)" Style="{StaticResource MutedText}"
+                                   Margin="0,5,0,0" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="2" Style="{StaticResource CardFlat}">
+                    <StackPanel>
+                        <TextBlock Text="Vencido" Style="{StaticResource MetricLabel}" />
+                        <TextBlock x:Name="OverdueValue" Text="$0.00" Style="{StaticResource MetricValue}" />
+                        <TextBlock Text="Requiere seguimiento" Style="{StaticResource MutedText}" Margin="0,5,0,0" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="4" Style="{StaticResource CardFlat}">
+                    <StackPanel>
+                        <TextBlock Text="Emitido este mes" Style="{StaticResource MetricLabel}" />
+                        <TextBlock x:Name="MonthValue" Text="$0.00" Style="{StaticResource MetricValue}" />
+                        <TextBlock x:Name="MonthHint" Text="0 factura(s)" Style="{StaticResource MutedText}"
+                                   Margin="0,5,0,0" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="6" Style="{StaticResource CardFlat}">
+                    <StackPanel>
+                        <TextBlock Text="Borradores" Style="{StaticResource MetricLabel}" />
+                        <TextBlock x:Name="DraftValue" Text="0" Style="{StaticResource MetricValue}" />
+                        <TextBlock Text="Aún no afectan reportes" Style="{StaticResource MutedText}" Margin="0,5,0,0" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <Border Style="{StaticResource Card}" Margin="0,18,0,0" Padding="16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="180" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                        <TextBlock Text="Buscar" Style="{StaticResource FieldLabel}" />
+                        <TextBox x:Name="SearchBox" ToolTip="Cliente, folio o nota" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Margin="0,0,10,0">
+                        <TextBlock Text="Estado" Style="{StaticResource FieldLabel}" />
+                        <ComboBox x:Name="StatusFilter" SelectedIndex="0">
+                            <ComboBoxItem Content="Todas" Tag="" />
+                            <ComboBoxItem Content="Borradores" Tag="borrador" />
+                            <ComboBoxItem Content="Emitidas" Tag="emitida" />
+                            <ComboBoxItem Content="Pagadas" Tag="pagada" />
+                            <ComboBoxItem Content="Canceladas" Tag="cancelada" />
+                        </ComboBox>
+                    </StackPanel>
+                    <Button Grid.Column="2" Content="Filtrar" Style="{StaticResource SecondaryButton}"
+                            VerticalAlignment="Bottom" Margin="0,0,8,0" Click="Filter_Click" />
+                    <Button Grid.Column="3" Content="Limpiar" Style="{StaticResource GhostButton}"
+                            VerticalAlignment="Bottom" Click="Clear_Click" />
+                </Grid>
+            </Border>
+
+            <Border Style="{StaticResource Card}" Margin="0,16,0,0" Padding="0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid>
+                        <DataGrid x:Name="InvoicesGrid" Height="440" RowHeight="52" ColumnHeaderHeight="36"
+                                  MouseDoubleClick="InvoicesGrid_MouseDoubleClick">
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn Header="Folio" Width="100">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding DisplayFolio}" FontWeight="SemiBold" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Fecha" Width="104"
+                                                    Binding="{Binding Date, Converter={StaticResource Date}}" />
+                                <DataGridTextColumn Header="Cliente" Width="*" Binding="{Binding ContactName}" />
+                                <DataGridTemplateColumn Header="Vence" Width="104">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock x:Name="dueText" Text="{Binding DueDate, Converter={StaticResource Date}}"
+                                                       Foreground="{StaticResource MutedBrush}" />
+                                            <DataTemplate.Triggers>
+                                                <DataTrigger Binding="{Binding IsOverdue}" Value="True">
+                                                    <Setter TargetName="dueText" Property="Foreground"
+                                                            Value="{StaticResource DangerBrush}" />
+                                                    <Setter TargetName="dueText" Property="FontWeight" Value="SemiBold" />
+                                                </DataTrigger>
+                                            </DataTemplate.Triggers>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Total" Width="92">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding TotalCents, Converter={StaticResource Money}}"
+                                                       HorizontalAlignment="Right" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Pagado" Width="82">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding PaidCents, Converter={StaticResource Money}}"
+                                                       Foreground="{StaticResource MutedBrush}" HorizontalAlignment="Right" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Saldo" Width="88">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock x:Name="balanceText"
+                                                       Text="{Binding BalanceCents, Converter={StaticResource Money}}"
+                                                       FontWeight="SemiBold" HorizontalAlignment="Right" />
+                                            <DataTemplate.Triggers>
+                                                <DataTrigger Binding="{Binding BalanceCents}" Value="0">
+                                                    <Setter TargetName="balanceText" Property="Foreground"
+                                                            Value="{StaticResource MutedBrush}" />
+                                                    <Setter TargetName="balanceText" Property="FontWeight" Value="Normal" />
+                                                </DataTrigger>
+                                            </DataTemplate.Triggers>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Estado" Width="88">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border x:Name="statusPill" Style="{StaticResource Pill}"
+                                                    Background="{StaticResource SuccessSoftBrush}">
+                                                <TextBlock x:Name="statusText"
+                                                           Text="{Binding Status, Converter={StaticResource StatusLabel}}"
+                                                           Foreground="{StaticResource SuccessBrush}"
+                                                           FontSize="10" FontWeight="SemiBold" />
+                                            </Border>
+                                            <DataTemplate.Triggers>
+                                                <DataTrigger Binding="{Binding Status}" Value="borrador">
+                                                    <Setter TargetName="statusPill" Property="Background"
+                                                            Value="{StaticResource WarnSoftBrush}" />
+                                                    <Setter TargetName="statusText" Property="Foreground"
+                                                            Value="{StaticResource WarnBrush}" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Status}" Value="emitida">
+                                                    <Setter TargetName="statusPill" Property="Background"
+                                                            Value="{StaticResource InfoSoftBrush}" />
+                                                    <Setter TargetName="statusText" Property="Foreground"
+                                                            Value="{StaticResource InfoBrush}" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsOverdue}" Value="True">
+                                                    <Setter TargetName="statusPill" Property="Background"
+                                                            Value="{StaticResource DangerSoftBrush}" />
+                                                    <Setter TargetName="statusText" Property="Foreground"
+                                                            Value="{StaticResource DangerBrush}" />
+                                                    <Setter TargetName="statusText" Property="Text" Value="Vencida" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Status}" Value="cancelada">
+                                                    <Setter TargetName="statusPill" Property="Background"
+                                                            Value="{StaticResource DangerSoftBrush}" />
+                                                    <Setter TargetName="statusText" Property="Foreground"
+                                                            Value="{StaticResource DangerBrush}" />
+                                                </DataTrigger>
+                                            </DataTemplate.Triggers>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="" Width="78">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Content="Ver" Style="{StaticResource SmallButton}" Width="66"
+                                                    Tag="{Binding}" Click="Open_Click" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <StackPanel x:Name="EmptyPanel" Visibility="Collapsed" HorizontalAlignment="Center"
+                                    VerticalAlignment="Center" Margin="0,48,0,52">
+                            <Border Width="44" Height="44" CornerRadius="22" Background="{StaticResource AccentSoftBrush}"
+                                    HorizontalAlignment="Center">
+                                <TextBlock Text="&#xE8A5;" FontFamily="{StaticResource IconFont}" FontSize="18"
+                                           Foreground="{StaticResource AccentBrush}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <TextBlock Text="Aún no hay facturas" FontSize="15" FontWeight="SemiBold"
+                                       HorizontalAlignment="Center" Margin="0,12,0,0" />
+                            <TextBlock Text="Crea tu primera factura para controlar cobros y descontar inventario."
+                                       Style="{StaticResource MutedText}" HorizontalAlignment="Center"
+                                       Margin="0,4,0,0" />
+                            <Button x:Name="EmptyNewButton" Content="Nueva factura"
+                                    Style="{StaticResource PrimaryButton}" HorizontalAlignment="Center"
+                                    Margin="0,14,0,0" Click="New_Click" />
+                        </StackPanel>
+                    </Grid>
+
+                    <Border Grid.Row="1" BorderBrush="{StaticResource LineBrush}" BorderThickness="0,1,0,0"
+                            Padding="16,11">
+                        <Grid>
+                            <TextBlock x:Name="CountText" Text="0 facturas" Style="{StaticResource MutedText}" />
+                            <TextBlock x:Name="SumText" HorizontalAlignment="Right" Style="{StaticResource MutedText}" />
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
+

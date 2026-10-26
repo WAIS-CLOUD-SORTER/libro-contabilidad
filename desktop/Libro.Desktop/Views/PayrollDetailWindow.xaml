@@ -1,0 +1,210 @@
+<Window x:Class="Libro.Desktop.Views.PayrollDetailWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Nómina · Libro"
+        Width="1280" Height="880"
+        MinWidth="1080" MinHeight="720"
+        WindowStartupLocation="CenterOwner"
+        Background="{StaticResource CanvasBrush}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="{StaticResource SurfaceBrush}"
+                BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="28,18">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock x:Name="TitleText" Text="Nómina" Style="{StaticResource PageTitle}" FontSize="26" />
+                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                        <Border x:Name="StatusPill" CornerRadius="99" Padding="10,3"
+                                Background="{StaticResource WarnSoftBrush}" VerticalAlignment="Center">
+                            <TextBlock x:Name="StatusText" Text="Borrador" FontSize="10" FontWeight="SemiBold"
+                                       Foreground="{StaticResource WarnBrush}" />
+                        </Border>
+                        <TextBlock x:Name="RangeText" Style="{StaticResource PageSubtitle}" Margin="10,0,0,0"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="RecalculateButton" Content="Recalcular" Style="{StaticResource SecondaryButton}"
+                            Margin="0,0,8,0" Click="Recalculate_Click" />
+                    <Button x:Name="RevertButton" Content="Revertir pago" Style="{StaticResource SecondaryButton}"
+                            Margin="0,0,8,0" Visibility="Collapsed" Click="Revert_Click" />
+                    <Button x:Name="PayButton" Content="Registrar pago" Style="{StaticResource PrimaryButton}"
+                            Margin="0,0,8,0" Click="Pay_Click" />
+                    <Button Content="Cerrar" Style="{StaticResource GhostButton}" IsCancel="True" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="28,20,28,24">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="14" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="14" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="14" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Style="{StaticResource CardFlat}">
+                        <StackPanel>
+                            <TextBlock Text="Empleados" Style="{StaticResource MetricLabel}" />
+                            <TextBlock x:Name="EmployeeValue" Text="0" Style="{StaticResource MetricValue}" />
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="2" Style="{StaticResource CardFlat}">
+                        <StackPanel>
+                            <TextBlock Text="Percepciones" Style="{StaticResource MetricLabel}" />
+                            <TextBlock x:Name="PerceptionsValue" Text="$0.00" Style="{StaticResource MetricValue}" />
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="4" Style="{StaticResource CardFlat}">
+                        <StackPanel>
+                            <TextBlock Text="Deducciones" Style="{StaticResource MetricLabel}" />
+                            <TextBlock x:Name="DeductionsValue" Text="$0.00" Style="{StaticResource MetricValue}" />
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="6" Style="{StaticResource CardFlat}">
+                        <StackPanel>
+                            <TextBlock Text="Neto a pagar" Style="{StaticResource MetricLabel}" />
+                            <TextBlock x:Name="NetValue" Text="$0.00" Style="{StaticResource MetricValue}"
+                                       Foreground="{StaticResource AccentBrush}" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <Border Style="{StaticResource Card}" Margin="0,16,0,0" Padding="0">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <DataGrid x:Name="ItemsGrid" Height="390" RowHeight="54" ColumnHeaderHeight="36">
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn Header="Empleado" Width="*" MinWidth="180">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding EmployeeName}" FontWeight="SemiBold"
+                                                           TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Text="{Binding EmployeePosition}" FontSize="10"
+                                                           Foreground="{StaticResource MutedBrush}" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Días" Width="54">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Days, StringFormat={}{0:0.###}}"
+                                                       HorizontalAlignment="Right" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Base" Width="90">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding BaseCents, Converter={StaticResource Money}}"
+                                                       HorizontalAlignment="Right" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Extra" Width="82">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding ExtraPerceptionsCents, Converter={StaticResource Money}}"
+                                                       HorizontalAlignment="Right" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="ISR" Width="82">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding IsrCents, Converter={StaticResource Money}}"
+                                                       HorizontalAlignment="Right" Foreground="{StaticResource MutedBrush}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="IMSS" Width="82">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding ImssCents, Converter={StaticResource Money}}"
+                                                       HorizontalAlignment="Right" Foreground="{StaticResource MutedBrush}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Infonavit" Width="84">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding InfonavitCents, Converter={StaticResource Money}}"
+                                                       HorizontalAlignment="Right" Foreground="{StaticResource MutedBrush}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Otras" Width="82">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding OtherDeductionsCents, Converter={StaticResource Money}}"
+                                                       HorizontalAlignment="Right" Foreground="{StaticResource MutedBrush}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Neto" Width="102">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding NetCents, Converter={StaticResource Money}}"
+                                                       HorizontalAlignment="Right" FontWeight="SemiBold" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn x:Name="WriteActionsColumn" Header="" Width="140">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                                <Button Content="Editar" Style="{StaticResource RowActionButton}" Width="56"
+                                                        Tag="{Binding}" Click="Edit_Click" Margin="0,0,4,0" />
+                                                <Button Content="Quitar" Style="{StaticResource RowActionButton}" Width="54"
+                                                        Tag="{Binding}" Click="Delete_Click" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        <StackPanel x:Name="EmptyPanel" Grid.Row="1" Margin="0,36,0,40"
+                                    Visibility="Collapsed" HorizontalAlignment="Center">
+                            <TextBlock Text="Sin conceptos" FontSize="16" FontWeight="SemiBold"
+                                       HorizontalAlignment="Center" />
+                            <TextBlock Text="No hay empleados activos en este periodo. Agrega empleados o recalcula."
+                                       Style="{StaticResource MutedText}" Margin="0,6,0,0"
+                                       HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <TextBlock x:Name="PaidNote" Style="{StaticResource MutedText}" Margin="2,10,0,0"
+                           Visibility="Collapsed" />
+            </StackPanel>
+        </ScrollViewer>
+
+        <Border Grid.Row="2" Background="{StaticResource SurfaceBrush}"
+                BorderBrush="{StaticResource LineBrush}" BorderThickness="0,1,0,0" Padding="28,12">
+            <Grid>
+                <TextBlock Text="El ISR e IMSS son cálculos de referencia. Puedes editar cada concepto antes de pagar."
+                           Style="{StaticResource MutedText}" VerticalAlignment="Center" />
+                <TextBlock x:Name="FooterNetText" HorizontalAlignment="Right" VerticalAlignment="Center"
+                           FontSize="15" FontWeight="SemiBold" />
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

@@ -1,0 +1,101 @@
+<Window x:Class="Libro.Desktop.Views.Dialogs.ContactDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Contacto · Libro"
+        Width="660" Height="690"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        Background="{StaticResource CanvasBrush}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="{StaticResource SurfaceBrush}"
+                BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="26,20">
+            <StackPanel>
+                <TextBlock x:Name="TitleText" Text="Nuevo contacto" Style="{StaticResource PageTitle}" FontSize="24" />
+                <TextBlock x:Name="SubtitleText" Style="{StaticResource PageSubtitle}"
+                           Text="Clientes para facturar; proveedores para tus gastos." />
+            </StackPanel>
+        </Border>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="26,18,26,18">
+                <Border Style="{StaticResource Card}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Row="0" Grid.Column="0">
+                            <TextBlock Text="Tipo" Style="{StaticResource FieldLabel}" />
+                            <ComboBox x:Name="TypeBox" SelectedIndex="0">
+                                <ComboBoxItem Content="Cliente" Tag="cliente" />
+                                <ComboBoxItem Content="Proveedor" Tag="proveedor" />
+                                <ComboBoxItem Content="Cliente y proveedor" Tag="ambos" />
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel Grid.Row="0" Grid.Column="2">
+                            <TextBlock Text="Nombre o razón social" Style="{StaticResource FieldLabel}" />
+                            <TextBox x:Name="NameBox" MaxLength="160" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,14,0,0">
+                            <TextBlock Text="RFC" Style="{StaticResource FieldLabel}" />
+                            <TextBox x:Name="RfcBox" MaxLength="20" CharacterCasing="Upper" />
+                        </StackPanel>
+                        <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,14,0,0">
+                            <TextBlock Text="Correo" Style="{StaticResource FieldLabel}" />
+                            <TextBox x:Name="EmailBox" MaxLength="160" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,14,0,0">
+                            <TextBlock Text="Teléfono" Style="{StaticResource FieldLabel}" />
+                            <TextBox x:Name="PhoneBox" MaxLength="60" />
+                        </StackPanel>
+                        <StackPanel Grid.Row="2" Grid.Column="2" Margin="0,14,0,0">
+                            <TextBlock Text="Dirección" Style="{StaticResource FieldLabel}" />
+                            <TextBox x:Name="AddressBox" MaxLength="500" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,14,0,0">
+                            <TextBlock Text="Notas" Style="{StaticResource FieldLabel}" />
+                            <TextBox x:Name="NotesBox" MaxLength="1000" Height="86" AcceptsReturn="True"
+                                     TextWrapping="Wrap" VerticalContentAlignment="Top" Padding="10,8" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Border Grid.Row="2" Background="{StaticResource SurfaceBrush}"
+                BorderBrush="{StaticResource LineBrush}" BorderThickness="0,1,0,0" Padding="26,14">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock x:Name="ErrorText" Style="{StaticResource ErrorText}"
+                           VerticalAlignment="Center" Margin="0,0,16,0" />
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button Content="Cancelar" Style="{StaticResource SecondaryButton}"
+                            IsCancel="True" Margin="0,0,10,0" Click="Cancel_Click" />
+                    <Button x:Name="SaveButton" Content="Crear contacto" Style="{StaticResource PrimaryButton}"
+                            IsDefault="True" Click="Save_Click" />
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

@@ -1,0 +1,153 @@
+<UserControl x:Class="Libro.Desktop.Views.PayrollView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="Transparent">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="34,26,34,34">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Text="Nómina" Style="{StaticResource PageTitle}" />
+                    <TextBlock Style="{StaticResource PageSubtitle}"
+                               Text="Periodos, ISR, IMSS y pago de sueldos. Los cálculos son una referencia editable." />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="NewButton" Content="Nueva nómina" Style="{StaticResource PrimaryButton}"
+                            Click="New_Click" />
+                </StackPanel>
+            </Grid>
+
+            <Grid Margin="0,22,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="14" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="14" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" Style="{StaticResource CardFlat}">
+                    <StackPanel>
+                        <TextBlock Text="En plantilla" Style="{StaticResource MetricLabel}" />
+                        <TextBlock x:Name="EmployeeValue" Text="0" Style="{StaticResource MetricValue}" />
+                        <TextBlock Text="Empleados activos" Style="{StaticResource MutedText}" Margin="0,4,0,0" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="2" Style="{StaticResource CardFlat}">
+                    <StackPanel>
+                        <TextBlock Text="Nóminas en borrador" Style="{StaticResource MetricLabel}" />
+                        <TextBlock x:Name="DraftValue" Text="0" Style="{StaticResource MetricValue}" />
+                        <TextBlock x:Name="DraftNetText" Text="$0.00 por pagar"
+                                   Style="{StaticResource MutedText}" Margin="0,4,0,0" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="4" Style="{StaticResource CardFlat}">
+                    <StackPanel>
+                        <TextBlock Text="Pagado este mes" Style="{StaticResource MetricLabel}" />
+                        <TextBlock x:Name="PaidValue" Text="$0.00" Style="{StaticResource MetricValue}" />
+                        <TextBlock x:Name="PaidCountText" Text="0 nóminas" Style="{StaticResource MutedText}"
+                                   Margin="0,4,0,0" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <Border Style="{StaticResource Card}" Margin="0,18,0,0" Padding="0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <DataGrid x:Name="PeriodsGrid" Height="440" RowHeight="58" ColumnHeaderHeight="36"
+                              MouseDoubleClick="PeriodsGrid_MouseDoubleClick">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="Periodo" Width="*" MinWidth="220">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Label}" FontWeight="SemiBold"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding RangeLabel}" FontSize="10"
+                                                       Foreground="{StaticResource MutedBrush}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Tipo" Width="92">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding PeriodType}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Empleados" Width="86"
+                                                Binding="{Binding EmployeeCount}" />
+                            <DataGridTemplateColumn Header="Deducciones" Width="105">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding TotalDeductionsCents, Converter={StaticResource Money}}"
+                                                   HorizontalAlignment="Right" Foreground="{StaticResource MutedBrush}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Neto" Width="112">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding TotalNetCents, Converter={StaticResource Money}}"
+                                                   HorizontalAlignment="Right" FontWeight="SemiBold" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Estado" Width="92">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border x:Name="statusPill" CornerRadius="99" Padding="9,3"
+                                                Background="{StaticResource WarnSoftBrush}" HorizontalAlignment="Left">
+                                            <TextBlock x:Name="statusText" Text="{Binding StatusLabel}"
+                                                       Foreground="{StaticResource WarnBrush}"
+                                                       FontSize="10" FontWeight="SemiBold" />
+                                        </Border>
+                                        <DataTemplate.Triggers>
+                                            <DataTrigger Binding="{Binding Status}" Value="pagada">
+                                                <Setter TargetName="statusPill" Property="Background"
+                                                        Value="{StaticResource SuccessSoftBrush}" />
+                                                <Setter TargetName="statusText" Property="Foreground"
+                                                        Value="{StaticResource SuccessBrush}" />
+                                            </DataTrigger>
+                                        </DataTemplate.Triggers>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="" Width="144">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                            <Button Content="Ver" Style="{StaticResource SmallButton}" Width="54"
+                                                    Tag="{Binding}" Click="Open_Click" Margin="0,0,4,0" />
+                                            <Button Content="Eliminar" Style="{StaticResource RowActionButton}" Width="72"
+                                                    Tag="{Binding}" Click="Delete_Click" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <StackPanel x:Name="EmptyPanel" Grid.Row="1" Margin="0,48,0,52"
+                                Visibility="Collapsed" HorizontalAlignment="Center">
+                        <TextBlock Text="Sin nóminas" FontSize="17" FontWeight="SemiBold"
+                                   HorizontalAlignment="Center" />
+                        <TextBlock Text="Crea un periodo para calcular los sueldos de tu plantilla."
+                                   Style="{StaticResource MutedText}" Margin="0,6,0,16"
+                                   HorizontalAlignment="Center" />
+                        <Button x:Name="EmptyNewButton" Content="Nueva nómina"
+                                Style="{StaticResource PrimaryButton}" HorizontalAlignment="Center"
+                                Click="New_Click" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <TextBlock x:Name="CountText" Style="{StaticResource MutedText}" Margin="2,10,0,0" />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
