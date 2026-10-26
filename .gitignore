@@ -34,3 +34,8 @@ __pycache__/
 *.plano
 clave.bin
 *.log
+
+# Android
+android/build/
+*.apk
+*.keystore

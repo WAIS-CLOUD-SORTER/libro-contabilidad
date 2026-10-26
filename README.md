@@ -248,7 +248,55 @@ Limitaciones conocidas:
 - La computadora debe estar **encendida y con Libro abierto**; no hay servicio de Windows.
 - El canal es **HTTP dentro de la red local**, no HTTPS: un certificado autofirmado haría que Android rechazara la página. El control real es el PIN más el token por dispositivo.
 - Si cambias el puerto, el teléfono debe emparejarse otra vez, porque el token está ligado al origen (incluido el puerto).
-- **Mercado Pago**: el cobro con tarjeta usa una terminal simulada si no hay credenciales. Con `MP_ACCESS_TOKEN` y `MP_DEVICE_ID` en el entorno se usa el adaptador de Point, que **todavía no se ha validado contra el servicio real**.
+- **Mercado Pago**: el cobro con tarjeta usa una terminal simulada si no hay credenciales. Las credenciales se piden en **Configuración → Ventas por celular** (o al abrir la app por primera vez) y se guardan cifradas con DPAPI. El adaptador usa la **Orders API** (`POST /v1/orders`), pero su cuerpo **todavía no se ha validado contra el servicio real**.
+
+## App para Android
+
+`dist\LibroVentas-2.1.0.apk` es un envoltorio nativo (WebView) de la misma
+interfaz de ventas. No reimplementa contabilidad: carga la página que sirve la
+computadora, así que **sigue haciendo falta la PC encendida, con Libro abierto y
+en la misma red Wi-Fi**.
+
+La diferencia con abrir la dirección en Chrome es que el APK trae icono propio,
+pantalla completa, guarda la dirección del servidor y permite tráfico HTTP local
+sin las restricciones del navegador.
+
+### Instalar
+
+1. Copia el `.apk` al teléfono (cable, nube o `adb install`).
+2. Ábrelo y acepta **instalar desde origen desconocido** si Android lo pide.
+3. La primera vez pide la dirección que muestra Libro en
+   **Configuración → Ventas por celular** (por ejemplo `http://192.168.1.10:8787`).
+4. Introduce el PIN de 6 dígitos para emparejar el teléfono.
+
+Para cambiar de servidor después: menú **⋮ → Cambiar servidor**.
+
+| Dato | Valor |
+| --- | --- |
+| Paquete | `mx.libro.ventas` |
+| versionCode | `20100` |
+| Android mínimo | 7.0 (API 24) · objetivo 34 |
+| Permisos | `INTERNET`, `ACCESS_NETWORK_STATE` |
+
+### Recompilar
+
+El APK **no usa Gradle**: se compila con las herramientas de la SDK
+(`aapt2`, `javac`, `d8`, `zipalign`, `apksigner`). Hace falta JDK 17 y el SDK de
+Android con `platforms;android-34` y `build-tools;34.0.0`.
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File android\build-apk.ps1
+```
+
+El script lee la versión del `.csproj`, así que el APK y el instalador no se
+desincronizan. Por defecto busca el toolchain en `C:\Proyectos\android-toolchain`
+y se puede cambiar con `ANDROID_TOOLCHAIN`, `ANDROID_HOME` y `JAVA_HOME`.
+
+> **Guarda el keystore.** Está en
+> `C:\Proyectos\android-toolchain\libro-ventas.keystore` (contraseña
+> `libroventas`). Android exige la **misma firma** para instalar una
+> actualización encima; si lo pierdes, habrá que desinstalar la app para
+> actualizarla. Está fuera del repositorio a propósito.
 
 ## CLI para agentes
 
