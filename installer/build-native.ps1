@@ -39,8 +39,23 @@ foreach ($Language in $Languages) {
 
 if (-not (Test-Path (Join-Path $AppDir "Libro.exe"))) { throw "No se generó Libro.exe." }
 if (-not (Test-Path (Join-Path $AppDir "e_sqlcipher.dll"))) { throw "Falta e_sqlcipher.dll." }
-if (Get-ChildItem $AppDir -Recurse -File -Filter "*.db" -ErrorAction SilentlyContinue) {
-    throw "La carpeta publicada contiene una base de datos; no debe distribuirse."
+
+# H-35: la guardia anterior sólo miraba *.db. Clave, respaldos y bitácora también
+# son datos reales que no deben viajar en el instalador.
+$SensitivePatterns = @("*.db", "*.db-wal", "*.db-shm", "*.libro", "*.plano", "clave.bin", "libro.log")
+foreach ($Pattern in $SensitivePatterns) {
+    $Found = Get-ChildItem $AppDir -Recurse -File -Filter $Pattern -ErrorAction SilentlyContinue
+    if ($Found) {
+        throw "La carpeta publicada contiene artefactos sensibles ($Pattern): $(@($Found)[0].FullName). No debe distribuirse."
+    }
+}
+
+# H-41: el repositorio no debe conservar bases planas con datos reales.
+$RepoRoot = Split-Path $PSScriptRoot -Parent
+foreach ($DataDir in @("data", "backups")) {
+    if (Test-Path (Join-Path $RepoRoot $DataDir)) {
+        throw "El repositorio contiene la carpeta '$DataDir', que puede tener datos reales en texto plano. Muévela fuera del proyecto antes de compilar."
+    }
 }
 
 Write-Host "2/4 Ejecutando pruebas internas..." -ForegroundColor Cyan

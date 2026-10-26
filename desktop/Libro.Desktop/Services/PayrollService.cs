@@ -186,6 +186,8 @@ public static class PayrollService
             ORDER BY name;
             """, new { start, end }, transaction).AsList();
 
+        var keptEmployeeIds = new List<long>();
+
         foreach (var employee in employees)
         {
             existing.TryGetValue(employee.Id, out var current);
@@ -247,7 +249,37 @@ public static class PayrollService
                         notes,
                     }, transaction);
             }
+
+            keptEmployeeIds.Add(employee.Id);
         }
+
+        RemoveObsoleteItems(connection, transaction, periodId, keptEmployeeIds);
+    }
+
+    /// <summary>
+    /// H-06: al recalcular, los conceptos cuyos empleados ya no participan en el
+    /// periodo (baja, alta fuera de fecha o cambio de estatus) deben desaparecer.
+    /// Antes quedaban y el neto se inflaba con gente que ya no correspondía.
+    /// Solo se eliminan empleados ajenos al cálculo: los ajustes manuales de los
+    /// empleados vigentes se conservan porque se leen y reescriben en su fila.
+    /// </summary>
+    private static void RemoveObsoleteItems(SqliteConnection connection, SqliteTransaction transaction,
+        long periodId, IReadOnlyCollection<long> keptEmployeeIds)
+    {
+        if (keptEmployeeIds.Count == 0)
+        {
+            connection.Execute(
+                "DELETE FROM payroll_items WHERE period_id = $periodId;",
+                new { periodId }, transaction);
+            return;
+        }
+
+        connection.Execute(
+            """
+            DELETE FROM payroll_items
+            WHERE period_id = $periodId AND employee_id NOT IN @keep;
+            """,
+            new { periodId, keep = keptEmployeeIds }, transaction);
     }
 
     private static PayrollCalculation? Calculate(Employee employee, string periodStart, string periodEnd,

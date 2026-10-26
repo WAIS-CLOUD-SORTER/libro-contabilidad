@@ -690,6 +690,92 @@ class LibroCliTests(unittest.TestCase):
         self.assertIn("clave.bin", doctor["note"])
         self.assertFalse((orphan / "clave.bin").exists(), "doctor no debe crear una llave nueva")
 
+    # ------------------------------------------------------------------ apoyo
+    def _fresh_install(self, name: str) -> tuple[Path, list[str]]:
+        """Crea una carpeta de datos aislada con empresa y administrador.
+
+        Las pruebas de regresión usan su propia instalación para no depender
+        del orden de la suite (H-72).
+        """
+        data_dir = self.data_dir / name
+        data_dir.mkdir()
+        self._json_ok([
+            "--data-dir", str(data_dir), "--json", "auth", "setup",
+            "--company", "Negocio Aislado", "--name", "Admin Aislado",
+            "--email", "admin@aislado.test", "--password", ADMIN_PASSWORD,
+        ])
+        scoped = [
+            "--data-dir", str(data_dir), "--json",
+            "--email", "admin@aislado.test", "--password", ADMIN_PASSWORD,
+        ]
+        return data_dir, scoped
+
+    def test_10_orphan_key_blocks_startup(self):
+        """H-21: una base cifrada sin clave.bin no debe generar una llave nueva."""
+        data_dir, scoped = self._fresh_install("orphan-key")
+        self.assertTrue((data_dir / "clave.bin").exists())
+
+        (data_dir / "clave.bin").unlink()
+        self.assertFalse((data_dir / "clave.bin").exists())
+
+        payload = self._json_error([*scoped, "dashboard"], contains="clave.bin")
+        self.assertIn("no", payload["error"].lower())
+        self.assertFalse(
+            (data_dir / "clave.bin").exists(),
+            "Una base cifrada huérfana nunca debe generar una llave nueva (H-21).",
+        )
+        self.assertTrue((data_dir / "contabilidad.db").exists())
+        self.assertGreater((data_dir / "contabilidad.db").stat().st_size, 0)
+
+        # doctor debe seguir diagnosticando el problema sin tocar la base.
+        doctor = self._json_ok(["--data-dir", str(data_dir), "--json", "doctor"])
+        self.assertFalse(doctor["opened"])
+        self.assertFalse(doctor["keyExists"])
+        self.assertFalse((data_dir / "clave.bin").exists())
+
+    def test_11_payroll_recalc_drops_departed_employees(self):
+        """H-06: recalcular debe eliminar conceptos de empleados dados de baja."""
+        data_dir, scoped = self._fresh_install("payroll-recalc")
+
+        employee_path = self._write_json("h06-empleado.json", {
+            "name": "Empleado Baja",
+            "rfc": "XAXX010101000",
+            "position": "Auxiliar",
+            "department": "Administracion",
+            "salaryCents": 2000000,
+            "startDate": "2026-01-01",
+            "status": "activo",
+        })
+        self._json_ok([*scoped, "employees", "save", "--input", str(employee_path)])
+        employees = self._json_ok([*scoped, "employees", "list"])
+        self.assertEqual(len(employees), 1)
+        employee_id = employees[0]["id"]
+
+        created = self._json_ok(
+            [*scoped, "payroll", "create", "--year", "2026", "--month", "10", "--type", "mensual"]
+        )
+        payroll_id = created["id"]
+
+        before = self._json_ok([*scoped, "payroll", "show", "--id", str(payroll_id)])
+        self.assertEqual(len(before["items"]), 1, "La nómina debe calcular al empleado activo.")
+        self.assertGreater(
+            before["period"]["totalNetCents"], 0,
+            "La nómina debe calcular el neto del empleado activo.",
+        )
+
+        self._json_ok([*scoped, "employees", "toggle", "--id", str(employee_id)])
+        self._json_ok([*scoped, "payroll", "recalc", "--id", str(payroll_id)])
+
+        after = self._json_ok([*scoped, "payroll", "show", "--id", str(payroll_id)])
+        self.assertEqual(
+            after["items"], [],
+            "Recalcular debe eliminar los conceptos de empleados dados de baja (H-06).",
+        )
+        self.assertEqual(
+            after["period"]["totalNetCents"], 0,
+            "El neto no debe conservar conceptos de empleados dados de baja (H-06).",
+        )
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
