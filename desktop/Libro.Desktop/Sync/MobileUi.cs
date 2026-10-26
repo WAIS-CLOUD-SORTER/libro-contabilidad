@@ -21,14 +21,17 @@ internal static class MobileUi
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{margin:0;height:100%}
   body{background:var(--canvas);color:var(--ink);font:16px/1.45 "Segoe UI",system-ui,-apple-system,sans-serif;
-       display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom)}
+       display:flex;flex-direction:column;overflow-x:hidden;padding-bottom:env(safe-area-inset-bottom)}
   header{background:var(--sidebar);color:#fff;padding:16px 18px;position:sticky;top:0;z-index:5}
   header .row{display:flex;justify-content:space-between;align-items:center;gap:12px}
   header h1{font-size:16px;margin:0;font-weight:600}
   header .sub{font-size:12px;color:#A8BDB4;margin-top:2px}
   .pill{background:#1C3A30;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;white-space:nowrap}
-  main{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
-  .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px}
+  main{flex:1;overflow-y:auto;overflow-x:hidden;min-width:0;padding:14px;
+       display:flex;flex-direction:column;gap:12px}
+  /* min-width:0 evita que un flex item no pueda encogerse por debajo del
+     ancho de su contenido, que era lo que desbordaba la tarjeta. */
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;min-width:0}
   label{display:block;font-size:12px;color:var(--muted);margin:0 0 5px;font-weight:600}
   input,select,button{font:inherit}
   input,select{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
@@ -37,7 +40,10 @@ internal static class MobileUi
   .primary{background:var(--accent);color:#fff;width:100%}
   .primary:disabled{opacity:.45}
   .ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}
-  .prod{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .prod{display:flex;justify-content:space-between;align-items:center;gap:10px;
+        padding:12px 0;border-bottom:1px solid var(--line);min-width:0}
+  .prod>div{min-width:0}
+  .grid2>div{min-width:0}
   .prod:last-child{border-bottom:0}
   .prod b{font-size:15px;font-weight:600;display:block}
   .prod small{color:var(--muted);font-size:12px}
@@ -150,7 +156,12 @@ internal static class MobileUi
 
   function renderCart() {
     var bar = $("cartBar");
-    if (!cart.length) { bar.classList.add("hide"); return; }
+    if (!cart.length) {
+      bar.classList.add("hide");
+      // Al cerrar la venta el total del encabezado debe volver a cero.
+      $("totalPill").textContent = money(0);
+      return;
+    }
     bar.classList.remove("hide");
     var total = 0;
     var html = cart.map(function (line) {
@@ -213,7 +224,8 @@ internal static class MobileUi
     return request("/api/catalog").then(function (data) {
       catalog = data;
       $("company").textContent = data.company || "Libro";
-      $("user").textContent = (data.user || "") + " · " + data.products.length + " productos";
+      $("user").textContent = (data.user || "") + " · " + data.products.length +
+        (data.products.length === 1 ? " producto" : " productos");
       fillSelect("contact", data.contacts, "Sin clientes registrados");
       fillSelect("account", data.accounts, "Sin cuentas");
       renderProducts("");

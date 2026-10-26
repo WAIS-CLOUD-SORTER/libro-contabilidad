@@ -2,7 +2,7 @@
 
 Aplicación de escritorio **nativa para Windows** para la contabilidad y administración local de un negocio en México. Está escrita en **C# / WPF sobre .NET 8**, guarda todo en una base **SQLCipher cifrada** y no necesita Node.js, navegador, servidor HTTP ni servicios en la nube.
 
-> Versión actual: **2.0.0** · Instalador: `dist\Libro-Setup-2.0.0.exe`  
+> Versión actual: **2.1.0** · Instalador: `dist\Libro-Setup-2.1.0.exe`  
 > Documentación completa: [`docs/README.md`](docs/README.md)
 
 ## Módulos
@@ -21,12 +21,12 @@ Aplicación de escritorio **nativa para Windows** para la contabilidad y adminis
 
 El artefacto listo para distribuir es:
 
-`dist\Libro-Setup-2.0.0.exe` (~50.5 MB)
+`dist\Libro-Setup-2.1.0.exe` (~55.5 MB)
 
 SHA256:
 
 ```text
-A7B78EE1B22405E696A5B7ADD764DD2E9C5E5F5C04641ACA5E10D790AAFDB525  Libro-Setup-2.0.0.exe
+52F5A0F605F077AB6BFF29544476DCEC2C9B4D61B9D168EDC9611E6806F41C95  Libro-Setup-2.1.0.exe
 ```
 
 Es una instalación **por usuario**, no requiere permisos de administrador:
@@ -42,7 +42,7 @@ Es una instalación **por usuario**, no requiere permisos de administrador:
 ### Instalar o actualizar
 
 1. Cierra Libro si está abierto.
-2. Ejecuta `Libro-Setup-2.0.0.exe`.
+2. Ejecuta `Libro-Setup-2.1.0.exe`.
 3. Si Windows SmartScreen muestra una advertencia (el instalador no está firmado digitalmente), elige **Más información → Ejecutar de todas formas**.
 4. Elige si quieres acceso directo en el escritorio. La opción de iniciar con Windows está desactivada por defecto.
 5. Al terminar, abre **Libro** desde el escritorio o el menú Inicio.
@@ -134,14 +134,14 @@ powershell -NoProfile -ExecutionPolicy Bypass -File installer\build-native.ps1
 Salidas:
 
 - `installer\native-app\` (aplicación publicada; no se distribuye por separado)
-- `dist\Libro-Setup-2.0.0.exe`
-- `dist\Libro-Setup-2.0.0.exe.sha256`
+- `dist\Libro-Setup-2.1.0.exe`
+- `dist\Libro-Setup-2.1.0.exe.sha256`
 
 Verificar integridad:
 
 ```powershell
-Get-FileHash .\dist\Libro-Setup-2.0.0.exe -Algorithm SHA256
-Get-Content .\dist\Libro-Setup-2.0.0.exe.sha256
+Get-FileHash .\dist\Libro-Setup-2.1.0.exe -Algorithm SHA256
+Get-Content .\dist\Libro-Setup-2.1.0.exe.sha256
 ```
 
 La autoprueba interna cubre:
@@ -208,7 +208,7 @@ Esta herramienta es de **control interno** y apoyo operativo:
 - La nómina es una estimación: ISR con tarifa mensual configurable (sin subsidio al empleo), IMSS con tasa simplificada. No genera CFDI de nómina ni cálculo oficial de cuotas.
 - El costo de ventas es una referencia con costo promedio al facturar; no es un costeo formal.
 - No hay conciliación bancaria automática.
-- Es una aplicación local de Windows; no incluye acceso por red local ni interfaz web.
+- Es una aplicación local de Windows. La única superficie de red es el servidor **opcional** de ventas para el teléfono (Configuración → Ventas por celular), limitado a la red privada; no hay interfaz web de administración ni acceso remoto.
 - El instalador no está firmado digitalmente; Windows puede mostrar SmartScreen.
 - La llave DPAPI está ligada a la cuenta de Windows. Los respaldos no son portables a otro perfil/equipo sin esa llave y ese perfil.
 
@@ -221,6 +221,30 @@ El código Next.js en `src/`, el instalador `installer\libro.iss` y `dist\Libro-
 ---
 
 Proyecto privado. Hecho para uso local; revisa y adapta la configuración fiscal con un profesional antes de usarlo en producción.
+
+## Ventas por celular
+
+Libro puede abrir un servidor local para que un teléfono en la misma red Wi-Fi
+registre ventas sobre la misma base. Está **apagado por defecto**.
+
+Para activarlo: **Configuración → Ventas por celular**, marca la casilla, pulsa
+**Aplicar** y anota la dirección y el PIN que aparecen.
+
+| Aspecto | Comportamiento |
+| --- | --- |
+| Alcance de red | Solo direcciones privadas (10/8, 172.16/12, 192.168/16) y loopback. Nunca una interfaz pública. |
+| Emparejamiento | PIN de 6 dígitos por arranque, 8 intentos por minuto y por IP. |
+| Credenciales | Cada teléfono recibe su propio token; la base solo guarda su hash SHA256. |
+| Sesión | El teléfono opera con la sesión de escritorio. Si cierras Libro o la sesión, deja de poder vender. |
+| Apagado | Desmarca la casilla y pulsa **Aplicar**. |
+| Firewall | La primera vez Windows pedirá permitir la aplicación en la red privada. |
+
+Limitaciones conocidas:
+
+- La computadora debe estar **encendida y con Libro abierto**; no hay servicio de Windows.
+- El canal es **HTTP dentro de la red local**, no HTTPS: un certificado autofirmado haría que Android rechazara la página. El control real es el PIN más el token por dispositivo.
+- Si cambias el puerto, el teléfono debe emparejarse otra vez, porque el token está ligado al origen (incluido el puerto).
+- **Mercado Pago**: el cobro con tarjeta usa una terminal simulada si no hay credenciales. Con `MP_ACCESS_TOKEN` y `MP_DEVICE_ID` en el entorno se usa el adaptador de Point, que **todavía no se ha validado contra el servicio real**.
 
 ## CLI para agentes
 
