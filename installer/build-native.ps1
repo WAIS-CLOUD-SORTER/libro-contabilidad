@@ -8,7 +8,15 @@ $Project = Join-Path $Root "desktop\Libro.Desktop\Libro.Desktop.csproj"
 $AppDir = Join-Path $PSScriptRoot "native-app"
 $Iss = Join-Path $PSScriptRoot "libro-native.iss"
 $DistDir = Join-Path $Root "dist"
-$Version = "2.0.0"
+
+# H-30: la versión vive en un solo lugar (el .csproj) y se propaga al
+# instalador. Antes estaba codificada aquí, en el .csproj y en el .iss.
+$VersionMatch = Select-String -Path $Project -Pattern '<Version>([^<]+)</Version>'
+if (-not $VersionMatch) { throw "No se encontró <Version> en $Project." }
+$Version = $VersionMatch.Matches[0].Groups[1].Value.Trim()
+if ($Version -notmatch '^\d+\.\d+\.\d+$') {
+    throw "La versión '$Version' del .csproj no tiene el formato Major.Minor.Patch."
+}
 
 $Dotnet = Join-Path $env:LOCALAPPDATA "Microsoft\dotnet\dotnet.exe"
 if (-not (Test-Path $Dotnet)) {
@@ -36,6 +44,12 @@ foreach ($Language in $Languages) {
     $LanguageDir = Join-Path $AppDir $Language
     if (Test-Path $LanguageDir) { Remove-Item $LanguageDir -Recurse -Force }
 }
+
+# H-36: los accesos directos apuntan a {app}\libro.ico, pero dotnet publish no
+# copia el icono. Sin esta copia el instalador mostraba un icono genérico.
+$Icon = Join-Path $PSScriptRoot "libro.ico"
+if (-not (Test-Path $Icon)) { throw "Falta installer\libro.ico." }
+Copy-Item -LiteralPath $Icon -Destination (Join-Path $AppDir "libro.ico") -Force
 
 if (-not (Test-Path (Join-Path $AppDir "Libro.exe"))) { throw "No se generó Libro.exe." }
 if (-not (Test-Path (Join-Path $AppDir "e_sqlcipher.dll"))) { throw "Falta e_sqlcipher.dll." }
@@ -74,7 +88,7 @@ if (-not (Test-Path $SelfTestLog) -or -not (Select-String -Path $SelfTestLog -Pa
 }
 
 Write-Host "3/4 Compilando instalador con Inno Setup..." -ForegroundColor Cyan
-& $Iscc $Iss
+& $Iscc "/DMyAppVersion=$Version" $Iss
 if ($LASTEXITCODE -ne 0) { throw "Falló Inno Setup." }
 
 $Setup = Join-Path $DistDir "Libro-Setup-$Version.exe"

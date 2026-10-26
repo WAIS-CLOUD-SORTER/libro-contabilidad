@@ -1,12 +1,18 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using Libro.Desktop.Services;
 using Libro.Desktop.Views;
+using Libro.Desktop.Views.Dialogs;
 
 namespace Libro.Desktop;
 
 public partial class MainWindow : Window
 {
+    private readonly List<string> _history = new();
+    private int _historyIndex = -1;
+    private bool _suppressHistory;
+    private List<NavItem> _navigation = new();
     private bool _ready;
 
     public MainWindow()
@@ -20,7 +26,8 @@ public partial class MainWindow : Window
         }
         CompanyLabel.Text = AppState.Company.Name;
 
-        NavList.ItemsSource = BuildNavigation();
+        _navigation = BuildNavigation();
+        NavList.ItemsSource = _navigation;
         _ready = true;
         NavList.SelectedIndex = 0;
     }
@@ -63,14 +70,22 @@ public partial class MainWindow : Window
 
     public void Navigate(string key)
     {
-        if (NavList.ItemsSource is not IEnumerable<NavItem> items) return;
-        var item = items.FirstOrDefault(candidate => candidate.Key == key);
+        var item = _navigation.FirstOrDefault(candidate => candidate.Key == key);
         if (item is null) return;
         NavList.SelectedItem = item;
     }
 
     private void ShowPage(string key)
     {
+        if (!_suppressHistory && (_history.Count == 0 || _history[^1] != key))
+        {
+            // Al navegar después de retroceder, se descarta la rama futura.
+            if (_historyIndex < _history.Count - 1)
+                _history.RemoveRange(_historyIndex + 1, _history.Count - _historyIndex - 1);
+            _history.Add(key);
+            _historyIndex = _history.Count - 1;
+        }
+
         PageHost.Content = key switch
         {
             "panel" => new DashboardView(),
@@ -88,6 +103,76 @@ public partial class MainWindow : Window
         };
         if (PageHost.Content is IRefreshable refreshable) refreshable.Refresh();
     }
+
+    private void MainWindow_KeyDown(object sender, KeyEventArgs e)
+    {
+        var key = e.Key == Key.System ? e.SystemKey : e.Key;
+        var modifiers = Keyboard.Modifiers;
+
+        if (modifiers == ModifierKeys.Control && DigitIndex(key) is { } index)
+        {
+            if (index < _navigation.Count)
+            {
+                Navigate(_navigation[index].Key);
+                e.Handled = true;
+            }
+            return;
+        }
+
+        if (modifiers == ModifierKeys.Alt && key is Key.Left or Key.Right)
+        {
+            TravelHistory(key == Key.Left ? -1 : 1);
+            e.Handled = true;
+            return;
+        }
+
+        // Las teclas de función no chocan con la captura de texto, así que se
+        // aceptan sin modificadores desde cualquier pantalla.
+        switch (key)
+        {
+            case Key.F1 when modifiers == ModifierKeys.None:
+                ShowShortcuts();
+                e.Handled = true;
+                break;
+            case Key.F5 when modifiers == ModifierKeys.None:
+                RefreshCurrentPage();
+                e.Handled = true;
+                break;
+        }
+    }
+
+    private static int? DigitIndex(Key key) => key switch
+    {
+        >= Key.D1 and <= Key.D9 => key - Key.D1,
+        >= Key.NumPad1 and <= Key.NumPad9 => key - Key.NumPad1,
+        _ => null,
+    };
+
+    private void TravelHistory(int delta)
+    {
+        var next = _historyIndex + delta;
+        if (next < 0 || next >= _history.Count) return;
+        _historyIndex = next;
+
+        _suppressHistory = true;
+        try
+        {
+            Navigate(_history[next]);
+        }
+        finally
+        {
+            _suppressHistory = false;
+        }
+    }
+
+    private void RefreshCurrentPage()
+    {
+        if (PageHost.Content is IRefreshable refreshable) refreshable.Refresh();
+    }
+
+    private void ShowShortcuts() => new ShortcutsDialog { Owner = this }.ShowDialog();
+
+    private void ShortcutsButton_Click(object sender, RoutedEventArgs e) => ShowShortcuts();
 
     private void LogoutButton_Click(object sender, RoutedEventArgs e)
     {

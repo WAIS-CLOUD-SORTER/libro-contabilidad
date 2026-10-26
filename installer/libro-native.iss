@@ -1,5 +1,9 @@
-﻿#define MyAppName "Libro"
-#define MyAppVersion "2.0.0"
+#define MyAppName "Libro"
+; La versión se pasa desde build-native.ps1 con /DMyAppVersion, que la lee del
+; .csproj (H-30). El valor por defecto solo se usa al compilar el .iss a mano.
+#ifndef MyAppVersion
+  #define MyAppVersion "2.1.0"
+#endif
 #define MyAppPublisher "Libro"
 #define MyAppId "{{28083929-8EB6-45E7-A6CD-D27B813BCC34}"
 
@@ -22,7 +26,9 @@ SolidCompression=yes
 WizardStyle=modern
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
-MinVersion=10.0
+; Windows 10 1809 o superior, que incluye Windows 11. Coincide con
+; SupportedOSPlatformVersion del .csproj.
+MinVersion=10.0.17763
 CloseApplications=yes
 RestartApplications=no
 SetupLogging=yes
