@@ -30,4 +30,11 @@
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Servidor local de ventas para el teléfono (Sync). Kestrel se usa en
+         lugar de HttpListener porque http.sys exige reservar la URL con
+         permisos de administrador, y Libro se instala por usuario. -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
 </Project>

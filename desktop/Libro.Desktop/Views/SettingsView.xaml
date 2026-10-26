@@ -60,6 +60,7 @@
                         <ListBoxItem Content="Cuentas de efectivo" Tag="cuentas" />
                         <ListBoxItem Content="Categorías" Tag="categorias" />
                         <ListBoxItem x:Name="BackupsNavItem" Content="Respaldos" Tag="respaldos" />
+                        <ListBoxItem x:Name="SyncNavItem" Content="Ventas por celular" Tag="sync" />
                     </ListBox>
                 </StackPanel>
             </Border>
@@ -353,6 +354,58 @@
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </Grid>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <ScrollViewer x:Name="SyncPanel" VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled" Visibility="Collapsed">
+                    <StackPanel>
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Text="Ventas desde el teléfono" Style="{StaticResource SectionTitle}" />
+                                <TextBlock Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,6,0,0"
+                                           Text="Activa un servidor local para que un teléfono en la misma red Wi-Fi registre ventas sobre esta misma base. Solo escucha en direcciones privadas y cada teléfono se empareja con el PIN de abajo. La computadora debe estar encendida, con Libro abierto y la sesión iniciada." />
+
+                                <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+                                    <CheckBox x:Name="SyncEnabledCheck" Content="Permitir ventas desde el teléfono"
+                                              VerticalAlignment="Center" />
+                                    <Button x:Name="SyncApplyButton" Content="Aplicar"
+                                            Style="{StaticResource SecondaryButton}"
+                                            Margin="16,0,0,0" Click="SyncApply_Click" />
+                                </StackPanel>
+
+                                <TextBlock Text="Dirección para el teléfono" Style="{StaticResource FieldLabel}"
+                                           Margin="0,18,0,0" />
+                                <TextBox x:Name="SyncUrlBox" IsReadOnly="True" />
+
+                                <TextBlock Text="PIN de emparejamiento" Style="{StaticResource FieldLabel}"
+                                           Margin="0,12,0,0" />
+                                <TextBox x:Name="SyncPinBox" IsReadOnly="True" FontSize="22"
+                                         FontWeight="SemiBold" HorizontalContentAlignment="Center" />
+
+                                <TextBlock x:Name="SyncStatusText" Style="{StaticResource MutedText}"
+                                           TextWrapping="Wrap" Margin="0,12,0,0" />
+                                <TextBlock x:Name="SyncErrorText" Style="{StaticResource ErrorText}"
+                                           Margin="0,8,0,0" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource Card}" Margin="0,16,0,0">
+                            <StackPanel>
+                                <TextBlock Text="Teléfonos emparejados" Style="{StaticResource SectionTitle}" />
+                                <ItemsControl x:Name="SyncDevicesList" Margin="0,8,0,0">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding}" Style="{StaticResource MutedText}"
+                                                       Margin="0,2,0,0" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <Button x:Name="SyncRevokeButton" Content="Quitar todos los teléfonos"
+                                        Style="{StaticResource SecondaryButton}" Margin="0,12,0,0"
+                                        HorizontalAlignment="Left" Click="SyncRevoke_Click" />
+                            </StackPanel>
                         </Border>
                     </StackPanel>
                 </ScrollViewer>

@@ -137,6 +137,85 @@ public partial class SettingsView : UserControl, IRefreshable
         AccountsPanel.Visibility = tag == "cuentas" ? Visibility.Visible : Visibility.Collapsed;
         CategoriesPanel.Visibility = tag == "categorias" ? Visibility.Visible : Visibility.Collapsed;
         BackupsPanel.Visibility = tag == "respaldos" ? Visibility.Visible : Visibility.Collapsed;
+        SyncPanel.Visibility = tag == "sync" ? Visibility.Visible : Visibility.Collapsed;
+        if (tag == "sync") LoadSync();
+    }
+
+    private void LoadSync()
+    {
+        try
+        {
+            var settings = Libro.Desktop.Sync.SyncStore.LoadSettings();
+            SyncEnabledCheck.IsChecked = settings.Enabled;
+
+            var server = Libro.Desktop.Sync.SyncServer.Current;
+            if (server is { IsRunning: true })
+            {
+                SyncUrlBox.Text = server.Urls.FirstOrDefault(url => !url.Contains("127.0.0.1"))
+                                  ?? server.Urls.FirstOrDefault() ?? "";
+                SyncPinBox.Text = server.Pin;
+                SyncStatusText.Text = "Servidor activo. Abre la dirección en el teléfono, escribe el PIN y empareja.";
+            }
+            else
+            {
+                SyncUrlBox.Text = "";
+                SyncPinBox.Text = "";
+                SyncStatusText.Text = "Servidor apagado. Actívalo y pulsa Aplicar.";
+            }
+
+            var devices = Libro.Desktop.Sync.SyncStore.LoadDevices();
+            SyncDevicesList.ItemsSource = devices.Count == 0
+                ? new[] { "Ningún teléfono emparejado todavía." }
+                : devices.Select(device => $"{device.Name} · último uso {device.LastSeenAt}").ToArray();
+            SyncErrorText.Text = "";
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("Cargar ventas por celular", ex);
+            SyncErrorText.Text = "No se pudo leer la configuración: " + ex.Message;
+        }
+    }
+
+    private void SyncApply_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var settings = Libro.Desktop.Sync.SyncStore.LoadSettings();
+            settings.Enabled = SyncEnabledCheck.IsChecked == true;
+            Libro.Desktop.Sync.SyncStore.SaveSettings(settings);
+
+            if (settings.Enabled)
+            {
+                Libro.Desktop.Sync.SyncServer.Start(settings.Port);
+                AppLog.Write($"Servidor de ventas activo en el puerto {settings.Port}");
+            }
+            else
+            {
+                Libro.Desktop.Sync.SyncServer.Stop();
+                AppLog.Write("Servidor de ventas detenido");
+            }
+
+            LoadSync();
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("Aplicar ventas por celular", ex);
+            SyncErrorText.Text = ex.Message;
+        }
+    }
+
+    private void SyncRevoke_Click(object sender, RoutedEventArgs e)
+    {
+        var owner = Window.GetWindow(this);
+        var answer = owner is null
+            ? MessageBoxResult.No
+            : MessageBox.Show(owner,
+                "¿Quitar todos los teléfonos emparejados? Tendrás que emparejarlos otra vez.",
+                "Libro", MessageBoxButton.YesNo, MessageBoxImage.Question);
+        if (answer != MessageBoxResult.Yes) return;
+
+        Libro.Desktop.Sync.SyncStore.SaveDevices(new List<Libro.Desktop.Sync.PairedDevice>());
+        LoadSync();
     }
 
     private void LoadCompany()

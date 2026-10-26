@@ -204,5 +204,10 @@ public partial class MainWindow : Window
             : (parts[0][..1] + parts[^1][..1]).ToUpperInvariant();
     }
 
-    private sealed record NavItem(string Key, string Label, string Icon);
+    private sealed record NavItem(string Key, string Label, string Icon)
+    {
+        // WPF expone ToString() como nombre de accesibilidad. Sin esto un lector
+        // de pantalla anuncia el volcado del record en lugar del módulo.
+        public override string ToString() => Label;
+    }
 }

@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Threading;
 using Libro.Desktop.Services;
 using Libro.Desktop.Util;
@@ -119,5 +119,37 @@ public partial class App : Application
         MainWindow = window;
         ShutdownMode = ShutdownMode.OnMainWindowClose;
         window.Show();
+        StartSalesServerIfEnabled();
+    }
+
+    /// <summary>
+    /// Arranca el servidor de ventas para el teléfono si está activado en
+    /// Configuración, o si LIBRO_SYNC lo fuerza (útil para pruebas y soporte).
+    /// Un fallo aquí nunca debe impedir usar la aplicación.
+    /// </summary>
+    private void StartSalesServerIfEnabled()
+    {
+        try
+        {
+            var settings = Libro.Desktop.Sync.SyncStore.LoadSettings();
+            var forced = Environment.GetEnvironmentVariable("LIBRO_SYNC");
+            if (!settings.Enabled && string.IsNullOrWhiteSpace(forced)) return;
+
+            var port = settings.Port;
+            if (int.TryParse(forced, out var forcedPort) && forcedPort > 0) port = forcedPort;
+
+            var server = Libro.Desktop.Sync.SyncServer.Start(port);
+            AppLog.Write($"Servidor de ventas activo en el puerto {port}: {string.Join(", ", server.Urls)}");
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("No se pudo iniciar el servidor de ventas", ex);
+        }
+    }
+
+    protected override void OnExit(ExitEventArgs e)
+    {
+        Libro.Desktop.Sync.SyncServer.Stop();
+        base.OnExit(e);
     }
 }
