@@ -2,7 +2,7 @@
 
 Aplicación de escritorio **nativa para Windows** para la contabilidad y administración local de un negocio en México. Está escrita en **C# / WPF sobre .NET 8**, guarda todo en una base **SQLCipher cifrada** y no necesita Node.js, navegador, servidor HTTP ni servicios en la nube.
 
-> Versión actual: **2.1.0** · Instalador: `dist\Libro-Setup-2.1.0.exe`  
+> Versión actual: **2.1.0** · Instalador: [`Libro-Setup-2.1.0.exe`](https://github.com/WAIS-CLOUD-SORTER/libro-contabilidad/releases/latest)  
 > Documentación completa: [`docs/README.md`](docs/README.md)
 
 ## Módulos
@@ -220,11 +220,11 @@ Antes de presentar declaraciones o tomar decisiones fiscales, valida las cifras 
 
 ## Aplicación anterior (legacy)
 
-El código Next.js en `src/`, el instalador `installer\libro.iss` y `dist\Libro-Setup-1.0.0.exe` se conservan únicamente como referencia histórica. **No los instales sobre la versión nativa 2.0.0**: comparten el mismo identificador de aplicación y podrían reemplazar archivos de la aplicación nativa. La versión vigente es la 2.0.0.
+El código Next.js en `src/`, el instalador `installer\libro.iss` y `dist\Libro-Setup-1.0.0.exe` se conservan únicamente como referencia histórica. **No los instales sobre la versión nativa vigente**: comparten el mismo identificador de aplicación y podrían reemplazar archivos de la aplicación nativa. La versión vigente es la 2.1.0.
 
 ---
 
-Proyecto privado. Hecho para uso local; revisa y adapta la configuración fiscal con un profesional antes de usarlo en producción.
+Proyecto de uso local; revisa y adapta la configuración fiscal con un profesional antes de usarlo en producción.
 
 ## Ventas por celular
 
